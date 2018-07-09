@@ -1,0 +1,19 @@
+{
+  "presets": [
+    [
+      "env",
+      {
+        "targets": {
+          "chrome": 63,
+          "firefox": 57
+        },
+        "useBuiltIns": false,
+        "debug": false
+      }
+    ]
+  ],
+  "plugins": [
+    "transform-object-rest-spread"
+  ],
+  "sourceMaps": false
+}
