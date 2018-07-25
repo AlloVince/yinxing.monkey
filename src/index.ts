@@ -120,7 +120,10 @@ class UI {
       }
       const movie = movies[index];
       $(movieItem).find('i.file-thumb')
-        .css('cssText', `background-image: url( "${movie.images[2]}" ) !important`);
+        .css(
+          'cssText',
+          `background-image: url( "${movie.images.find(i => i.endsWith('ps.jpg'))}" ) !important`,
+        );
       $(movieItem).find('a.name').text(`[${movie.banngo}]${movie.title}`);
       return;
     });
