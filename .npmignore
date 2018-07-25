@@ -2,4 +2,4 @@
 !lib/**/*
 !package.json
 !README.md
-!index.user.js
+!index.js
