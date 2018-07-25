@@ -18,8 +18,8 @@ class UI {
         }),
         Noty.button('登录115', 'btn btn-info', () => {
           MonkeyKernel.openTab('https://115.com');
-        })
-      ]
+        }),
+      ],
     }).show();
   }
 
@@ -29,7 +29,7 @@ class UI {
   static async handleCurrentPage(entryParentId: string = '1153737365202791679') {
     const yx = new YinXing({
       videoTargetId: '1214716263562079924',
-      isoTargetId: '1227621927028387453'
+      isoTargetId: '1227621927028387453',
     });
     const parentId = $('#js_data_list li[rel=item]:nth-child(1)').attr('p_id');
     await yx.handleAll(entryParentId || parentId);
@@ -80,7 +80,6 @@ class UI {
     return MonkeyKernel.notify(`成功: ${text} MagnetSent`);
   }
 
-
   /**
    * @param btnElement
    * @returns {{$element: jQuery|HTMLElement, link: *, text: string}}
@@ -90,7 +89,7 @@ class UI {
     return {
       $element: $el,
       link: $el.attr('href'),
-      text: $el.text().trim()
+      text: $el.text().trim(),
     };
   }
 
@@ -109,24 +108,19 @@ class UI {
       .map((item, index) => ({
         index,
         title: item.getAttribute('title'),
-        banngo: YinXing.parseBanngo(item.getAttribute('title'))
+        banngo: YinXing.parseBanngo(item.getAttribute('title')),
       }));
-    const movies = await Promise
-      .all(banngos
-        .map(b => (b.banngo ?
-          MonkeyKernel.requestJSON({
-            url: 'http://yinxing.com/v1/movies',
-            query: { q: b.banngo }
-          }) :
-          () => {
-          })));
+    const { results: movies } = await MonkeyKernel.requestJSON({
+      url: 'https://yinxing.av2.us/v1/search',
+      query: { q: banngos.map(b => b.banngo || '').join(',') },
+    });
     $movieItems.each((index: number, movieItem: HTMLElement) => {
-      if (!movies[index] || !movies[index].results || movies[index].results.length < 1) {
+      if (!movies[index]) {
         return;
       }
-      const movie = movies[index].results[0];
+      const movie = movies[index];
       $(movieItem).find('i.file-thumb')
-        .css('cssText', `background-image: url( "${movie.images[1]}" ) !important`);
+        .css('cssText', `background-image: url( "${movie.images[2]}" ) !important`);
       $(movieItem).find('a.name').text(`[${movie.banngo}]${movie.title}`);
       return;
     });
@@ -143,23 +137,24 @@ const boot = async () => {
     return true;
   });
 
-  //会在115所有页面运行
+  // 会在115所有页面运行
   UI.changeLayouts();
   MonkeyKernel.arrive('#js_file_container ul.list-thumb', async (element) => {
-    console.info('[Yinxing:Boot]FileInterface list arrived by DOM(#js_file_container ul.list-thumb) loaded');
+    console.info(
+      '[Yinxing:Boot]FileInterface list arrived by DOM(#js_file_container ul.list-thumb) loaded');
     UI.initYinxingMennu();
     await UI.autoThumbnails($(element).find('li[rel="item"]'));
   });
 
-  //仅在115主页面运行
+  // 仅在115主页面运行
   // if ($('div.ceiling-container').length > 0) {
   // }
 
   return true;
 };
 
-//Run script at document-start
-//https://greasyfork.org/en/forum/discussion/20558
+// Run script at document-start
+// https://greasyfork.org/en/forum/discussion/20558
 $(document).ready(() => {
   (async () => {
     await boot();

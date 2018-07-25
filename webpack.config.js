@@ -4,7 +4,7 @@ const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 module.exports = {
   entry: './src/index.ts',
   output: {
-    path: `${__dirname}/dist`,
+    path: `${__dirname}/lib`,
     filename: 'index.js'
   },
   resolve: {

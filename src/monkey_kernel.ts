@@ -9,9 +9,8 @@ const $ = jQuery.noConflict(true);
 
 Noty.overrideDefaults({
   // layout: 'bottomRight',
-  theme: 'relax'
+  theme: 'relax',
 });
-
 
 declare global {
   interface JQuery {
@@ -20,10 +19,10 @@ declare global {
 }
 
 interface Request {
-  url: string,
-  query?: object,
-  data?: object,
-  body?: object
+  url: string;
+  query?: object;
+  data?: object;
+  body?: object;
 }
 
 export default class MonkeyKernel {
@@ -72,28 +71,31 @@ export default class MonkeyKernel {
     }
 
     return new Promise((resolve, reject) => {
-      (GM_xmlhttpRequest || GM.xmlHttpRequest)(Object.assign({
-        method: 'GET'
-      }, request, {
-        onerror: (err: Error) => {
-          console.debug('[GM:Kernel]Request: %o, Response error: %o', request, err);
-          reject(err);
+      (GM_xmlhttpRequest || GM.xmlHttpRequest)(Object.assign(
+        {
+          method: 'GET',
         },
-        onload: (response: any) => {
-          if (response.status >= 300) {
-            return reject(response.responseText);
-          }
+        request,
+        {
+          onerror: (err: Error) => {
+            console.debug('[GM:Kernel]Request: %o, Response error: %o', request, err);
+            reject(err);
+          },
+          onload: (response: any) => {
+            if (response.status >= 300) {
+              return reject(response.responseText);
+            }
 
-          try {
-            const res = JSON.parse(response.responseText);
-            console.debug('[GM:Kernel]Request: %o, Response success: %o', request, res);
-            return resolve(res);
-          } catch (e) {
-            console.debug('[GM:Kernel]Request: %o, Response error: %o', request, response);
-            return reject(e);
-          }
-        }
-      }));
+            try {
+              const res = JSON.parse(response.responseText);
+              console.debug('[GM:Kernel]Request: %o, Response success: %o', request, res);
+              return resolve(res);
+            } catch (e) {
+              console.debug('[GM:Kernel]Request: %o, Response error: %o', request, response);
+              return reject(e);
+            }
+          },
+        }));
     });
   }
 
@@ -123,4 +125,3 @@ export default class MonkeyKernel {
 }
 
 export { $, jQuery, Noty };
-

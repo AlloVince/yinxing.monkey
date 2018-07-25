@@ -3,22 +3,22 @@ import MonkeyKernel from './monkey_kernel';
 import { YYWCloud, File } from './yyw_cloud';
 
 interface Movie {
-  id: string,
-  title: string,
-  banngo: string,
-  subBanngo: string,
-  alt: string,
-  pubdate: string,
-  year: string,
-  durations: string,
-  summary: string,
-  tags: string,
-  makerId: string,
-  seriesId: string,
-  images: string[],
-  previews: string[],
-  casts: [{ name: string }],
-  maker: { id: string, name: string }
+  id: string;
+  title: string;
+  banngo: string;
+  subBanngo: string;
+  alt: string;
+  pubdate: string;
+  year: string;
+  durations: string;
+  summary: string;
+  tags: string;
+  makerId: string;
+  seriesId: string;
+  images: string[];
+  previews: string[];
+  casts: [{ name: string }];
+  maker: { id: string, name: string };
 }
 
 export default class YinXing {
@@ -35,7 +35,10 @@ export default class YinXing {
    * @param {string[]} ignorePrefixes
    * @returns {string | null}
    */
-  static parseBanngo(text: string, ignorePrefixes: Array<string> = ['hjd2048.com', 'fhd-1080p']): string | null {
+  static parseBanngo(
+    text: string,
+    ignorePrefixes: string[] = ['hjd2048.com', 'fhd-1080p'],
+  ): string | null {
     let filteredText = text.toLowerCase();
     ignorePrefixes.forEach(ignore => filteredText = filteredText.replace(ignore, ''));
     const res = /([a-zA-Z]{2,6})-?(\d{2,5})/ig.exec(filteredText);
@@ -49,7 +52,7 @@ export default class YinXing {
   static async matchMovie(banngo: string): Promise<Movie | null> {
     const res: { results: Movie[] } = await MonkeyKernel.requestJSON({
       url: 'http://yinxing.com/v1/movies',
-      query: { q: banngo }
+      query: { q: banngo },
     });
 
     if (!res || !res.results || res.results.length < 1) {
@@ -82,7 +85,7 @@ export default class YinXing {
     const fileName = sanitize(`[${movie.banngo}]${casts} - ${movie.title}`);
     return {
       dirName,
-      fileName
+      fileName,
     };
   }
 
@@ -104,11 +107,16 @@ export default class YinXing {
     console.group(`[Yinxing:handlePage]Page ${parentId}, offset ${offset}`);
     const res = await YYWCloud.getFileList({
       parentId,
-      offset
+      offset,
     });
     for (const file of res.files) {
       if (file.isDir) {
-        console.debug('[Yinxing:handlePage]Start handle %s isFolder[%s] on page %s', file.name, file.isDir, parentId);
+        console.debug(
+          '[Yinxing:handlePage]Start handle %s isFolder[%s] on page %s',
+          file.name,
+          file.isDir,
+          parentId,
+        );
         const folderInfo = await YYWCloud.getFolderDetail(file);
         if (folderInfo.size < File.humanFileSizeToByte('120MB')) {
           console.info('[Yinxing:handlePage]Remove dir %s by empty folder', file.name);
@@ -146,8 +154,12 @@ export default class YinXing {
       return console.debug('[Yinxing:handleFie]Not able to handle %s by no banngo', file.name);
     }
 
-    if (['mp4', 'avi', 'wmv', 'mkv', 'iso', 'rmvb'].includes(file.fileType) === false) {
-      return console.debug('[Yinxing:handleFie]Not able to handle %s by incorrect file type %s', file.name, file.fileType);
+    if (!['mp4', 'avi', 'wmv', 'mkv', 'iso', 'rmvb'].includes(file.fileType)) {
+      return console.debug(
+        '[Yinxing:handleFie]Not able to handle %s by incorrect file type %s',
+        file.name,
+        file.fileType,
+      );
     }
 
     const movie = await YinXing.matchMovie(banngo);
@@ -158,9 +170,16 @@ export default class YinXing {
     }
 
     const { dirName, fileName } = this.toNames(movie);
-    console.debug('[Yinxing:handleFie]Try to handle file from %s to %s/%s', file.name, dirName, fileName);
+    console.debug(
+      '[Yinxing:handleFie]Try to handle file from %s to %s/%s',
+      file.name,
+      dirName,
+      fileName,
+    );
 
-    const movieDir = await this.findOrCreateDir(dirName, file.fileType === 'iso' ? this.isoTargetId : this.videoTargetId);
+    const movieDir = await this.findOrCreateDir(
+      dirName, file.fileType === 'iso' ? this.isoTargetId : this.videoTargetId,
+    );
     console.debug('[Yinxing:handleFie]-- FindOrCreateDir: %o', movieDir);
 
     console.debug('[Yinxing:handleFie]-- Move %o to: %o', file, movieDir);

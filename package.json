@@ -2,7 +2,7 @@
   "name": "yinxing.monkey",
   "version": "0.0.0",
   "description": "",
-  "main": "dist/index.js",
+  "main": "lib/index.js",
   "dependencies": {
     "arrive": "^2.4.1",
     "jquery": "^3.2.1",
@@ -19,11 +19,6 @@
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-env": "^1.6.1",
     "css-loader": "^0.28.8",
-    "eslint": "^4.13.1",
-    "eslint-config-airbnb": "^16.1.0",
-    "eslint-plugin-import": "^2.2.0",
-    "eslint-plugin-jsx-a11y": "^6.0.2",
-    "eslint-plugin-react": "^7.1.0",
     "file-loader": "^1.1.6",
     "pre-commit": "^1.2.2",
     "source-map-loader": "^0.2.3",
@@ -42,7 +37,7 @@
     "build-dev": "webpack",
     "watch": "webpack --watch",
     "dev": "webpack-dev-server --content-base dist/ --inline --hot",
-    "lint": "eslint src/* --ext .js"
+    "lint": "tslint src/**/*.ts --exclude '**/*.d.ts' --project tsconfig.json"
   },
   "pre-commit": [
   ],
@@ -51,7 +46,7 @@
     "url": "git+https://github.com/AlloVince/yinxing.monkey.git"
   },
   "author": "AlloVince",
-  "license": "MIT",
+  "license": "GNU3",
   "bugs": {
     "url": "https://github.com/AlloVince/yinxing.monkey/issues"
   },

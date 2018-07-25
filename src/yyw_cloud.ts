@@ -1,36 +1,36 @@
 import MonkeyKernel from './monkey_kernel';
 
 export interface FileInterface {
-  id: string,
-  name?: string,
-  isDir?: boolean,
-  size?: number, //Byte
-  fileType?: string,
-  sha?: string,
-  createdAt?: number,
-  updatedAt?: number,
-  thumbnail?: string,
-  pickcode?: string,
-  stared?: boolean,
-  raw?: any
+  id: string;
+  name?: string;
+  isDir?: boolean;
+  size?: number; // Byte
+  fileType?: string;
+  sha?: string;
+  createdAt?: number;
+  updatedAt?: number;
+  thumbnail?: string;
+  pickcode?: string;
+  stared?: boolean;
+  raw?: any;
 }
 
 export interface FolderInterface extends FileInterface {
-  totalSize?: number,
-  totalFiles?: number
+  totalSize?: number;
+  totalFiles?: number;
 }
 
 interface YywFileInterface {
-  fid: string,
-  cid: string,
-  n: string,
-  s?: number,
-  sha?: string,
-  pc?: string,
-  te?: number,
-  ico?: string,
-  u?: string,
-  m?: number,
+  fid: string;
+  cid: string;
+  n: string;
+  s?: number;
+  sha?: string;
+  pc?: string;
+  te?: number;
+  ico?: string;
+  u?: string;
+  m?: number;
 }
 
 export class File implements FileInterface {
@@ -48,19 +48,19 @@ export class File implements FileInterface {
   raw?: any;
 
   constructor({
-    id,
-    name,
-    isDir,
-    size,
-    fileType,
-    sha,
-    createdAt,
-    updatedAt,
-    thumbnail,
-    pickcode,
-    stared,
-    raw
-  }: FileInterface) {
+                id,
+                name,
+                isDir,
+                size,
+                fileType,
+                sha,
+                createdAt,
+                updatedAt,
+                thumbnail,
+                pickcode,
+                stared,
+                raw,
+              }: FileInterface) {
     this.id = id;
     this.name = name;
     this.isDir = isDir;
@@ -114,32 +114,33 @@ export class File implements FileInterface {
    * @param others
    * @returns {FileInterface}
    */
-  static factory({
-    fid,
-    cid,
-    n,
-    s,
-    sha,
-    pc,
-    te,
-    ico,
-    u,
-    m,
-    ...others
-  }: YywFileInterface): FileInterface {
+  static factory(
+    {
+      fid,
+      cid,
+      n,
+      s,
+      sha,
+      pc,
+      te,
+      ico,
+      u,
+      m,
+      ...others // tslint:disable-line
+    }: YywFileInterface): FileInterface {
     const isDir = !(Number.parseInt(fid, 10) > 0);
     return new File({
       isDir,
+      sha,
       id: fid || cid,
       name: n,
       size: s,
-      sha,
       pickcode: pc,
       createdAt: te,
       fileType: ico,
       thumbnail: u,
       stared: m > 0,
-      raw: others
+      raw: others,
     });
   }
 
@@ -166,11 +167,11 @@ export class Pagination {
   order: string;
 
   constructor({
-    total,
-    offset,
-    limit,
-    order
-  }) {
+                total,
+                offset,
+                limit,
+                order,
+              }) {
     this.total = total;
     this.offset = offset;
     this.limit = limit;
@@ -185,16 +186,16 @@ export class Pagination {
    * @returns {Pagination}
    */
   static factory({
-    count,
-    offset,
-    page_size: pageSize,
-    order
-  }) {
+                   count,
+                   offset,
+                   page_size: pageSize,
+                   order,
+                 }) {
     return new Pagination({
-      total: count,
       offset,
+      order,
+      total: count,
       limit: pageSize,
-      order
     });
   }
 }
@@ -215,7 +216,7 @@ export class YYWCloud {
       request.headers = request.headers || {};
       Object.assign(request.headers, {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'X-Requested-With': 'XMLHttpRequest'
+        'X-Requested-With': 'XMLHttpRequest',
       });
     }
 
@@ -245,15 +246,15 @@ export class YYWCloud {
       url: 'http://web.api.115.com/files/add',
       body: {
         pid: parentId,
-        cname: dirName
-      }
+        cname: dirName,
+      },
     });
     // {"state":true,"error":"","errno":"","aid":1,"cid":"1214536459596459422",
     // "cname":"test","file_id":"1214536459596459422","file_name":"test"}
     return new File({
       isDir: true,
       id: res.cid,
-      name: res.cname
+      name: res.cname,
     });
   }
 
@@ -268,8 +269,8 @@ export class YYWCloud {
       url: 'http://web.api.115.com/rb/delete',
       body: {
         pid: parentId,
-        fid: files.map(file => file.id)
-      }
+        fid: files.map(file => file.id),
+      },
     });
     return true;
   }
@@ -285,8 +286,8 @@ export class YYWCloud {
       url: 'http://web.api.115.com/files/move',
       body: {
         pid: parentId,
-        fid: files.map(file => file.id)
-      }
+        fid: files.map(file => file.id),
+      },
     });
     return true;
   }
@@ -302,8 +303,8 @@ export class YYWCloud {
       url: 'http://web.api.115.com/files/edit',
       body: {
         fid: file.id,
-        file_name: name
-      }
+        file_name: name,
+      },
     });
     return true;
   }
@@ -315,29 +316,29 @@ export class YYWCloud {
    * @returns Promise<{pagination: Pagination, files: File[]}>
    */
   static async getFileList({
-    parentId,
-    offset = 0,
-    limit = 40
-  }: { parentId: string, offset?: number, limit?: number }) {
+                             parentId,
+                             offset = 0,
+                             limit = 40,
+                           }: { parentId: string, offset?: number, limit?: number }) {
     const res = await YYWCloud.requestAPI({
       method: 'GET',
       url: 'http://web.api.115.com/files',
       query: {
+        offset,
+        limit,
         aid: 1,
         cid: parentId,
         o: 'user_ptime',
         asc: 0,
-        offset,
         show_dir: 1,
-        limit,
         snap: 0,
         natsort: 1,
-        format: 'json'
-      }
+        format: 'json',
+      },
     });
     return {
       pagination: Pagination.factory(res),
-      files: File.factoryFromArray(res.data)
+      files: File.factoryFromArray(res.data),
     };
   }
 
@@ -348,28 +349,33 @@ export class YYWCloud {
    * @param {number} limit
    * @returns {Promise<{pagination: Pagination; files: File[]}>}
    */
-  static async search({
-    q, parentId = 0, offset = 0, limit = 40
-  }: { q: string, parentId?: string, offset?: number, limit?: number }): Promise<{ pagination: Pagination, files: File[] }> {
+  static async search(
+    {
+      q,
+      parentId = 0,
+      offset = 0,
+      limit = 40,
+    }: { q: string, parentId?: string, offset?: number, limit?: number },
+  ): Promise<{ pagination: Pagination, files: File[] }> {
     const res = await YYWCloud.requestAPI({
       method: 'GET',
       url: 'http://web.api.115.com/files/search',
       query: {
+        offset,
+        limit,
         aid: 1,
         search_value: q,
         cid: parentId,
         asc: 0,
-        offset,
         show_dir: 1,
-        limit,
         snap: 0,
         natsort: 1,
-        format: 'json'
-      }
+        format: 'json',
+      },
     });
     return {
       pagination: Pagination.factory(res),
-      files: File.factoryFromArray(res.data)
+      files: File.factoryFromArray(res.data),
     };
   }
 
@@ -384,16 +390,16 @@ export class YYWCloud {
       url: 'http://web.api.115.com/category/get',
       query: {
         aid: 1,
-        cid: file.id
-      }
+        cid: file.id,
+      },
     });
-    if (Number.parseInt(res.file_category) > 0) {
+    if (Number.parseInt(res.file_category, 10) > 0) {
       throw new Error('Not a folder');
     }
     return {
       id: file.id,
       count: res.count,
-      size: File.humanFileSizeToByte(res.size)
+      size: File.humanFileSizeToByte(res.size),
     };
   }
 
@@ -430,31 +436,31 @@ export class YYWCloud {
       query: {
         ct: 'offline',
         ac: 'space',
-        _: Date.now()
-      }
+        _: Date.now(),
+      },
     });
   }
 
   /**
    * @param {string} magnet
-   * @returns Promise<{info_hash: string; name: string; state: boolean; errno: number; errtype: string; url: string; errcode: number}>
+   * @returns Promise<{info_hash: string; name: string;
+   *  state: boolean; errno: number; errtype: string; url: string; errcode: number}>
    */
   async download(magnet: string): Promise<{
     info_hash: string, name: string, state: boolean,
-    errno: number, errtype: string, url: string, errcode: number
+    errno: number, errtype: string, url: string, errcode: number,
   }> {
     const { sign } = await this.getSign();
     const res = await YYWCloud.requestAPI({
       method: 'POST',
       url: 'http://115.com/web/lixian/?ct=lixian&ac=add_task_url',
       body: {
+        sign,
         url: magnet,
         uid: this.uid,
-        sign,
-        time: Date.now()
-      }
+        time: Date.now(),
+      },
     });
     return res;
   }
 }
-
