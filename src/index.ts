@@ -149,10 +149,6 @@ const boot = async () => {
     await UI.autoThumbnails($(element).find('li[rel="item"]'));
   });
 
-  // 仅在115主页面运行
-  // if ($('div.ceiling-container').length > 0) {
-  // }
-
   return true;
 };
 
