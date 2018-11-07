@@ -33,7 +33,7 @@ module.exports = {
               }
             }
           },
-          'source-map-loader'
+          // 'source-map-loader'
         ]
       },
       {
@@ -42,7 +42,7 @@ module.exports = {
           {
             loader: 'babel-loader'
           },
-          'source-map-loader'
+          // 'source-map-loader'
         ]
       },
       {
@@ -55,13 +55,13 @@ module.exports = {
     ]
   },
   plugins: [].concat(process.env.NODE_ENV === 'production' ? [
-    new UglifyJSPlugin({
-      sourceMap: true,
-      parallel: true,
-      uglifyOptions: {
-        compress: true
-      }
-    }),
+    // new UglifyJSPlugin({
+    //   sourceMap: true,
+    //   parallel: true,
+    //   uglifyOptions: {
+    //     compress: true
+    //   }
+    // }),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify('production')
     })

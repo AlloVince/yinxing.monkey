@@ -32,7 +32,7 @@
     "webpack-dev-server": "^3.1.10"
   },
   "scripts": {
-    "build": "NODE_ENV=production webpack",
+    "build": "NODE_ENV=production webpack --mode=production",
     "build-dev": "webpack",
     "watch": "webpack --mode=development --watch",
     "dev": "webpack-dev-server --content-base dist/ --inline --hot",
