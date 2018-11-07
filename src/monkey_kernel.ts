@@ -5,12 +5,16 @@ import 'noty/lib/noty.css';
 import 'noty/lib/themes/relax.css';
 
 declare const GM: any;
+declare const GM_notification: any;
 const $ = jQuery.noConflict(true);
 
 Noty.overrideDefaults({
   // layout: 'bottomRight',
   theme: 'relax',
+  visibilityControl: true,
+  timeout: 10000,
 });
+Noty.setMaxVisible(999999999);
 
 declare global {
   interface JQuery {
@@ -110,9 +114,9 @@ export default class MonkeyKernel {
    * @param {string} text
    * @param {object} notyOptions
    */
-  static notify(text: string, notyOptions: object = {}): void {
+  static notify(text: string, type: string = 'alert', notyOptions: object = {}): void {
     // GM_notification(text);
-    new Noty(Object.assign({ text }, notyOptions)).show();
+    new Noty(Object.assign({ text, type }, notyOptions)).show();
   }
 
   /**

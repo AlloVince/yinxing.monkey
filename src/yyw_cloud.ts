@@ -355,7 +355,7 @@ export class YYWCloud {
       parentId = 0,
       offset = 0,
       limit = 40,
-    }: { q: string, parentId?: string, offset?: number, limit?: number },
+    }: { q: string, parentId?: number | string, offset?: number, limit?: number },
   ): Promise<{ pagination: Pagination, files: File[] }> {
     const res = await YYWCloud.requestAPI({
       method: 'GET',

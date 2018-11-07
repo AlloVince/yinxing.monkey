@@ -75,9 +75,9 @@ class UI {
     try {
       await cloud.download(link);
     } catch (e) {
-      return MonkeyKernel.notify(`失败:${e.message} FOR ${text} MagnetSending`);
+      return MonkeyKernel.notify(`失败:${e.message} FOR ${text} MagnetSending`, 'error');
     }
-    return MonkeyKernel.notify(`成功: ${text} MagnetSent`);
+    return MonkeyKernel.notify(`成功: ${text} MagnetSent`, 'success');
   }
 
   /**
