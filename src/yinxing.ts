@@ -37,7 +37,7 @@ export default class YinXing {
    */
   static parseBanngo(
     text: string,
-    ignorePrefixes: string[] = ['hjd2048.com', 'fhd-1080p'],
+    ignorePrefixes: string[] = ['hjd2048.com', 'fhd-1080p', 'bbs25'],
   ): string | null {
     let filteredText = text.toLowerCase();
     ignorePrefixes.forEach(ignore => filteredText = filteredText.replace(ignore, ''));

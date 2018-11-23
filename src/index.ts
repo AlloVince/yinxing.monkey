@@ -96,9 +96,9 @@ class UI {
   static changeLayouts() {
     MonkeyKernel.addStyle(`
     .view-width { width: 100%; }
-    .list-thumb li { width: 140px; height: 290px;}
+    .list-thumb li { width: 140px; height: 294px;}
     .list-thumb li .file-thumb { width: 140px; height:180px; }
-    .list-thumb li .file-name { width: 140ox; height: 47px; font-size:11px; }
+    .list-thumb li .file-name { width: 140ox; height: 57px; font-size:11px; }
     `);
   }
 
