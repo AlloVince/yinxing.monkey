@@ -31,41 +31,41 @@
 ```
 yinxing.monkey/
 ├── src/
-│   ├── index.ts          # 入口文件：UI 类 + 启动逻辑
-│   ├── monkey_kernel.ts  # GM_* API 抽象层 + Noty/jQuery 封装
-│   ├── yinxing.ts        # 元数据 API 客户端 + 文件整理引擎
-│   ├── yyw_cloud.ts      # 115 云盘 API 客户端（模型 + CRUD）
-│   └── types.d.ts        # CSS 模块类型声明
+│   ├── index.ts              # 入口文件（启动逻辑 / boot）
+│   ├── core/
+│   │   └── monkey_kernel.ts  # GM_* API 抽象层 + Noty/jQuery 封装
+│   ├── services/
+│   │   ├── yyw_cloud.ts      # 115 云盘 API 客户端（模型 + CRUD）
+│   │   └── yinxing.ts        # 元数据 API 客户端 + 文件整理引擎
+│   ├── ui/
+│   │   └── ui.ts             # UI 类（菜单 / 缩略图 / 剪贴板 / 布局）
+│   └── types/
+│       ├── domain.ts         # 领域模型 & 请求类型
+│       ├── css.d.ts          # CSS 模块类型声明
+│       ├── greasemonkey.d.ts # GM_* 全局声明
+│       └── jquery.d.ts       # jQuery / arrive 全局增强
+├── scripts/
+│   └── release.js            # 发布时生成用户脚本头部
 ├── lib/
-│   └── index.js          # Webpack 构建产物（提交到仓库，npm 发布用）
-├── release.js            # 发布时生成用户脚本头部（index.js）
-├── webpack.config.js     # Webpack 配置
-├── eslint.config.mjs     # ESLint 9 flat config
-├── tsconfig.json         # TypeScript 配置
+│   └── index.js              # Webpack 构建产物（npm 发布用）
+├── webpack.config.js         # Webpack 配置
+├── eslint.config.mjs         # ESLint 9 flat config
+├── tsconfig.json             # TypeScript 配置（strict）
 ├── package.json
-├── .node-version         # Node 24
-└── .ai/                  # AI 开发文档（本目录）
+├── .node-version             # Node 24
+└── .ai/                      # AI 开发文档（本目录）
 ```
 
 ---
 
 ## 各文件详解
 
-### `src/index.ts` — 入口 & UI
+### `src/index.ts` — 入口 & 启动
 
-- **`UI` 类**（静态方法）：
-  - `storeAndGetYYWID()` — 读取/保存 115 用户 ID（通过 GM storage），弹出 Noty 输入框
-  - `handleCurrentPage(entryParentId)` — 实例化 `YinXing` 并执行文件整理
-  - `initYinxingMennu()` — 在 115 页面注入下拉菜单（银杏/更换ID/自动整理/同步）
-  - `addLinkToClipboard(btnElement)` — 复制磁力链接到剪贴板
-  - `downloadByCloud(btnElement, cloud)` — 发送磁力链接到 115 离线下载
-  - `parseButton(btnElement)` — 提取链接元素中的 `{href, text}`
-  - `changeLayouts()` — 注入 CSS 调整 115 页面布局为全宽
-  - `autoThumbnails($movieItems)` — 批量查询元数据 API 替换缩略图
 - **`boot()`** — 主启动函数：注册全局点击事件、布局调整、arrive 监听动态 DOM
 - **`$(document).ready()`** 启动
 
-### `src/monkey_kernel.ts` — GM 抽象层
+### `src/core/monkey_kernel.ts` — GM 抽象层
 
 - 声明 `GM_*` 全局变量（`GM_openInTab`, `GM_setValue`, `GM_getValue` 等）
 - 导入 `noty`（通知）、`jquery`（`noConflict(true)` 模式）、`arrive`（DOM 变化监听）、CSS 样式
@@ -76,7 +76,19 @@ yinxing.monkey/
   - `arrive(selector, handler)` — 使用 `arrive` 库监听动态 DOM 元素出现
 - 重新导出 `$`, `jQuery`, `Noty`
 
-### `src/yyw_cloud.ts` — 115 云盘 API
+### `src/ui/ui.ts` — UI 类
+
+- **`UI` 类**（静态方法）：
+  - `storeAndGetYYWID()` — 读取/保存 115 用户 ID（通过 GM storage），弹出 Noty 输入框
+  - `handleCurrentPage(entryParentId)` — 实例化 `YinXing` 并执行文件整理
+  - `initYinxingMennu()` — 在 115 页面注入下拉菜单（银杏/更换ID/自动整理/同步）
+  - `addLinkToClipboard(btnElement)` — 复制磁力链接到剪贴板
+  - `downloadByCloud(btnElement, cloud)` — 发送磁力链接到 115 离线下载
+  - `parseButton(btnElement)` — 提取链接元素中的 `{href, text}`
+  - `changeLayouts()` — 注入 CSS 调整 115 页面布局为全宽
+  - `autoThumbnails($movieItems)` — 批量查询元数据 API 替换缩略图
+
+### `src/services/yyw_cloud.ts` — 115 云盘 API
 
 - **`FileInterface` / `FolderInterface`** — 领域模型接口
 - **`YywFileInterface`** — 115 API 原始响应格式（`fid`, `cid`, `n`, `s`, `sha`, `pc`, `te`, `ico`, `u`, `m`）
@@ -89,7 +101,7 @@ yinxing.monkey/
   - `download(magnet)` — 发起离线下载
 - 包含已注释的待实现功能：`setThumbnail`, `uploadFromUrl`, `exportToAria2`, `getStars`, `uploadTorrent`
 
-### `src/yinxing.ts` — 元数据 API + 文件整理
+### `src/services/yinxing.ts` — 元数据 API + 文件整理
 
 - **`Movie`** 接口 — 完整元数据（番号、标题、演员、厂商、图片等）
 - **`YinXing`** 类：
@@ -101,7 +113,7 @@ yinxing.monkey/
   - `handlePage(parentId, offset)` — 递归处理：删除空文件夹（<120MB）、处理文件
   - `handleFile(file, isDir)` — 核心处理管线：提取番号 → 过滤非视频类型 → 查询元数据 → 创建文件夹 → 移动 → 重命名
 
-### `release.js` — 发布脚本
+### `scripts/release.js` — 发布脚本
 
 - 构建时工具，**非运行时**代码
 - 根据 `semantic-release` 传递的版本号，生成用户脚本头部（`// ==UserScript==` 块）
@@ -173,11 +185,11 @@ npm run lint       # ESLint 代码检查
 
 ### 已知问题
 
-- `noImplicitAny: false`，大量使用 `any` 类型
+- TypeScript 已启用 `strict` 模式，但仍保留少量 `as unknown as` 类型断言（GM API 未提供完整类型）
 - 部分 JSDoc 注释与实际返回值不一致（如 `getFolderDetail` 的 JSDoc）
 - 115 和元数据 API 使用 `http://` 而非 `https://`
-- 部分方法名和日志名不一致（如 `handleFile` 日志中写作 `handleFie`）
-- `lib/` 目录（构建产物）提交到仓库
+- 部分方法名和日志名不一致（如日志中 `handleFie` 是历史遗留，已统一为 `handleFile`）
+- `lib/` 目录（构建产物）提交到仓库，供 npm 发布 + jsDelivr CDN 使用
 
 ---
 

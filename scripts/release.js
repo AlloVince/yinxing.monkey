@@ -1,6 +1,8 @@
 const fs = require('fs');
 const [, , version] = process.argv;
-fs.writeFileSync('index.js',
+
+fs.writeFileSync(
+  'index.js',
   `// ==UserScript==
 // @name         银杏
 // @namespace    yinxing
@@ -29,7 +31,5 @@ fs.writeFileSync('index.js',
 // @grant        unsafeWindow
 // @run-at       document-start
 // @include      http*
-// ==/UserScript==`);
-
-
-
+// ==/UserScript==`,
+);

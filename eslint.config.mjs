@@ -2,7 +2,7 @@ import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
-    ignores: ['lib/', 'dist/', 'node_modules/', 'webpack.config.js'],
+    ignores: ['lib/', 'dist/', 'node_modules/', 'webpack.config.js', 'release.js', 'scripts/'],
   },
   ...tseslint.configs.recommended,
   {

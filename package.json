@@ -51,7 +51,7 @@
       "@semantic-release/npm",
       {
         "path": "@semantic-release/exec",
-        "cmd": "node release.js ${nextRelease.version}"
+        "cmd": "node scripts/release.js ${nextRelease.version}"
       }
     ]
   },

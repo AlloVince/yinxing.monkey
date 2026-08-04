@@ -1,21 +1,20 @@
 {
   "compilerOptions": {
-    "rootDir": "./src/",
-    "outDir": "./dist/",
-    "allowSyntheticDefaultImports": true,
-    "lib": ["dom", "es2023"],
+    "target": "es2023",
     "module": "esnext",
     "moduleResolution": "bundler",
-    "noImplicitAny": false,
-    "removeComments": false,
+    "lib": ["dom", "es2023"],
+    "rootDir": "./src/",
+    "outDir": "./dist/",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    "target": "es2023"
+    "removeComments": true
   },
-  "include": [
-    "src/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "webpack"
-  ]
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist", "lib"]
 }

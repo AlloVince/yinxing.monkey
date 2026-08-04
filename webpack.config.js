@@ -1,44 +1,49 @@
 const webpack = require('webpack');
+const path = require('path');
 
+/** @type {import('webpack').Configuration} */
 module.exports = {
+  mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
   entry: './src/index.ts',
   output: {
-    path: `${__dirname}/lib`,
-    filename: 'index.js'
+    path: path.resolve(__dirname, 'lib'),
+    filename: 'index.js',
+    clean: false,
   },
   resolve: {
     alias: {
-      //解决jQuery在插件中找不到全局变量的问题
-      jquery: 'jquery/src/jquery'
+      // Ensure jQuery globals are available in plugins
+      jquery: 'jquery/src/jquery',
     },
-    extensions: ['.ts', '.tsx', '.js', '.jsx']
+    extensions: ['.ts', '.tsx', '.js', '.jsx'],
   },
   watchOptions: {
-    ignored: /node_modules/
+    ignored: /node_modules/,
   },
   module: {
     rules: [
       {
         test: /\.tsx?$/,
-        use: [
-          {
-            loader: 'ts-loader'
-          }
-        ]
+        use: [{ loader: 'ts-loader' }],
       },
       {
         test: /\.css$/,
-        use: [
-          { loader: 'style-loader' },
-          { loader: 'css-loader' }
-        ]
-      }
-    ]
+        use: [{ loader: 'style-loader' }, { loader: 'css-loader' }],
+      },
+    ],
   },
-  plugins: [].concat(process.env.NODE_ENV === 'production' ? [
-    new webpack.DefinePlugin({
-      'process.env.NODE_ENV': JSON.stringify('production')
-    })
-  ] : []),
-  devtool: 'source-map'
+  plugins: [
+    ...(process.env.NODE_ENV === 'production'
+      ? [
+          new webpack.DefinePlugin({
+            'process.env.NODE_ENV': JSON.stringify('production'),
+          }),
+        ]
+      : []),
+  ],
+  devtool: 'source-map',
+  // Don't warn about large bundle size — this is a userscript, not a web app
+  performance: {
+    hints: false,
+  },
 };
