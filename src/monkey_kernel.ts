@@ -5,7 +5,13 @@ import 'noty/lib/noty.css';
 import 'noty/lib/themes/relax.css';
 
 declare const GM: any;
-declare const GM_notification: any;
+declare const GM_openInTab: any;
+declare const GM_setValue: any;
+declare const GM_getValue: any;
+declare const GM_deleteValue: any;
+declare const GM_addStyle: any;
+declare const GM_xmlhttpRequest: any;
+declare const GM_setClipboard: any;
 const $ = jQuery.noConflict(true);
 
 Noty.overrideDefaults({
@@ -114,17 +120,16 @@ export default class MonkeyKernel {
    * @param {string} text
    * @param {object} notyOptions
    */
-  static notify(text: string, type: string = 'alert', notyOptions: object = {}): void {
-    // GM_notification(text);
-    new Noty(Object.assign({ text, type }, notyOptions)).show();
+  static notify(text: string, type: string = 'alert', notyOptions: Record<string, unknown> = {}): void {
+    new Noty(Object.assign({ text, type: (type as any) }, notyOptions)).show();
   }
 
   /**
    * @param selector
    * @param handle
    */
-  static arrive(selector: string, handle: (el: HTMLElement) => {}) {
-    return $(document).arrive(selector, handle);
+  static arrive(selector: string, handle: (el: HTMLElement) => void): void {
+    $(document).arrive(selector, handle);
   }
 }
 

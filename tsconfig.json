@@ -3,14 +3,17 @@
     "rootDir": "./src/",
     "outDir": "./dist/",
     "allowSyntheticDefaultImports": true,
-    "lib": ["dom", "es2015", "es2016"],
-    "jsx": "preserve",
+    "lib": ["dom", "es2023"],
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "noImplicitAny": false,
     "removeComments": false,
-    "target": "esnext"
+    "skipLibCheck": true,
+    "target": "es2023"
   },
+  "include": [
+    "src/**/*.ts"
+  ],
   "exclude": [
     "node_modules",
     "webpack"

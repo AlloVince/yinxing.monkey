@@ -88,7 +88,7 @@ export class File implements FileInterface {
       TB: (i: number) => i * 1024 ** 4,
       PB: (i: number) => i * 1024 ** 5,
     };
-    const [, size, unit] = fileSize.toUpperCase().match(/([\d\.]+)(\w+)/);
+    const [, size, unit] = fileSize.toUpperCase().match(/([\d.]+)(\w+)/);
     return Math.floor(handlers[unit](Number.parseFloat(size)));
   }
 
