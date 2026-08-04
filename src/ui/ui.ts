@@ -1,6 +1,6 @@
 import MonkeyKernel, { $, Noty } from '../core/monkey_kernel';
 import { YYWCloud } from '../services/yyw_cloud';
-import YinXing from '../services/yinxing';
+import YinXing, { METADATA_API_ENABLED } from '../services/yinxing';
 
 export default class UI {
   static storeAndGetYYWID(): string | void {
@@ -92,6 +92,10 @@ export default class UI {
   }
 
   static async autoThumbnails($movieItems: JQuery): Promise<void> {
+    if (!METADATA_API_ENABLED) {
+      console.debug('[Yinxing:autoThumbnails]Skipped — metadata API disabled');
+      return;
+    }
     const banngos = $movieItems
       .toArray()
       .map((item) => ({

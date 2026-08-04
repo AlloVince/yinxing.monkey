@@ -143,7 +143,7 @@ export class YYWCloud {
   static async mkDir(dirName: string, parentId: string = '0'): Promise<File> {
     const res = (await YYWCloud.requestAPI({
       method: 'POST',
-      url: 'http://web.api.115.com/files/add',
+      url: 'https://web.api.115.com/files/add',
       body: { pid: parentId, cname: dirName },
     })) as { cid: string; cname: string };
     return new File({ isDir: true, id: res.cid, name: res.cname });
@@ -152,7 +152,7 @@ export class YYWCloud {
   static async remove(files: File[] = [], _parentId: number = 0): Promise<boolean> {
     await YYWCloud.requestAPI({
       method: 'POST',
-      url: 'http://web.api.115.com/rb/delete',
+      url: 'https://web.api.115.com/rb/delete',
       body: { pid: _parentId, fid: files.map((f) => f.id) },
     });
     return true;
@@ -161,7 +161,7 @@ export class YYWCloud {
   static async move(files: File[] = [], parentId: string): Promise<boolean> {
     await YYWCloud.requestAPI({
       method: 'POST',
-      url: 'http://web.api.115.com/files/move',
+      url: 'https://web.api.115.com/files/move',
       body: { pid: parentId, fid: files.map((f) => f.id) },
     });
     return true;
@@ -170,7 +170,7 @@ export class YYWCloud {
   static async rename(file: File, name: string): Promise<boolean> {
     await YYWCloud.requestAPI({
       method: 'POST',
-      url: 'http://web.api.115.com/files/edit',
+      url: 'https://web.api.115.com/files/edit',
       body: { fid: file.id, file_name: name },
     });
     return true;
@@ -184,7 +184,7 @@ export class YYWCloud {
     const { parentId, offset = 0, limit = 40 } = options;
     const res = (await YYWCloud.requestAPI({
       method: 'GET',
-      url: 'http://web.api.115.com/files',
+      url: 'https://web.api.115.com/files',
       query: {
         offset,
         limit,
@@ -213,7 +213,7 @@ export class YYWCloud {
     const { q, parentId = 0, offset = 0, limit = 40 } = options;
     const res = (await YYWCloud.requestAPI({
       method: 'GET',
-      url: 'http://web.api.115.com/files/search',
+      url: 'https://web.api.115.com/files/search',
       query: {
         offset,
         limit,
@@ -236,7 +236,7 @@ export class YYWCloud {
   static async getFolderDetail(file: File): Promise<{ id: string; count: number; size: number }> {
     const res = (await YYWCloud.requestAPI({
       method: 'GET',
-      url: 'http://web.api.115.com/category/get',
+      url: 'https://web.api.115.com/category/get',
       query: { aid: 1, cid: file.id },
     })) as { file_category: string; count: number; size: string };
     if (Number.parseInt(res.file_category, 10) > 0) {
@@ -252,7 +252,7 @@ export class YYWCloud {
   private async getSign(): Promise<{ sign: string }> {
     return (await YYWCloud.requestAPI({
       method: 'GET',
-      url: 'http://115.com/',
+      url: 'https://115.com/',
       query: { ct: 'offline', ac: 'space', _: Date.now() },
     })) as { sign: string };
   }

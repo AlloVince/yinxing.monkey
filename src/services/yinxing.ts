@@ -6,6 +6,15 @@ import { File, YYWCloud } from './yyw_cloud';
 export { YYWCloud, File };
 export type { Movie };
 
+/**
+ * Metadata API feature toggle.
+ *
+ * Set to `false` when the external metadata API (yinxing.com / yinxing.av2.us)
+ * is unavailable, to disable auto-organize and thumbnail replacement without
+ * breaking the rest of the script (magnet link handling, offline download, etc.).
+ */
+export const METADATA_API_ENABLED = false;
+
 export default class YinXing {
   readonly videoTargetId: string;
   readonly isoTargetId: string;
@@ -31,6 +40,10 @@ export default class YinXing {
 
   /** Query the metadata API for a movie matching the given banngo. */
   static async matchMovie(banngo: string): Promise<Movie | null> {
+    if (!METADATA_API_ENABLED) {
+      console.debug('[Yinxing:matchMovie]Skipped — metadata API disabled');
+      return null;
+    }
     const res = (await MonkeyKernel.requestJSON({
       url: 'http://yinxing.com/v1/movies',
       query: { q: banngo },
