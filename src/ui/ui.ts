@@ -160,6 +160,32 @@ export default class UI {
     });
   }
 
+  /** 根据 banngo 替换缩略图为 DMM 图片 */
+  static replaceThumbnails(): void {
+    document.querySelectorAll('.file-grid-item').forEach((item) => {
+      const titleSpan = item.querySelector<HTMLSpanElement>(
+        '.flex.items-center.justify-center.text-xs span.inline-block'
+      );
+      if (!titleSpan) return;
+      const title = titleSpan.textContent?.trim();
+      if (!title) return;
+
+      const banngo = YinXing.parseBanngo(title);
+      if (!banngo) return;
+
+      // banngo 格式: "abc-123" 或 "abc123"
+      const match = /([a-z]{2,6})-?(\d{2,5})/.exec(banngo);
+      if (!match) return;
+      const letters = match[1];
+      const number = match[2].padStart(5, '0');
+      const imgUrl = `https://awsimgsrc.dmm.co.jp/pics_dig/digital/video/${letters}${number}/${letters}${number}ps.jpg?w=200&h=272&f=webp`;
+
+      const img = item.querySelector('img');
+      if (!img) return;
+      img.src = imgUrl;
+    });
+  }
+
   static async autoThumbnails($movieItems: JQuery): Promise<void> {
     if (!METADATA_API_ENABLED) {
       console.debug('[Yinxing:autoThumbnails]Skipped — metadata API disabled');

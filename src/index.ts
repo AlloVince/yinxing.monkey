@@ -1,5 +1,6 @@
 import MonkeyKernel, { $ } from './core/monkey_kernel';
 import { YYWCloud } from './services/yyw_cloud';
+import YinXing from './services/yinxing';
 import UI from './ui/ui';
 
 async function boot(): Promise<void> {
@@ -18,6 +19,7 @@ async function boot(): Promise<void> {
 
   // Replace titles for existing items + watch for dynamically added ones
   UI.replaceTitleWithAttr();
+  UI.replaceThumbnails();
   MonkeyKernel.arrive('.file-grid-item', (item: Element) => {
     const titleSpan = item.querySelector<HTMLSpanElement>(
       '.flex.items-center.justify-center.text-xs span.inline-block'
@@ -30,6 +32,22 @@ async function boot(): Promise<void> {
       innerSpan.textContent = titleAttr;
     } else {
       titleSpan.textContent = titleAttr;
+    }
+    // Also replace thumbnail for this new item
+    const title = titleSpan.textContent?.trim();
+    if (title) {
+      const banngo = YinXing.parseBanngo(title);
+      if (banngo) {
+        const match = /([a-z]{2,6})-?(\d{2,5})/.exec(banngo);
+        if (match) {
+          const letters = match[1];
+          const number = match[2].padStart(5, '0');
+          const img = item.querySelector('img');
+          if (img) {
+            img.src = `https://awsimgsrc.dmm.co.jp/pics_dig/digital/video/${letters}${number}/${letters}${number}ps.jpg?w=200&h=272&f=webp`;
+          }
+        }
+      }
     }
   });
 
