@@ -82,7 +82,8 @@ export default class UI {
     };
   }
 
-  static changeLayouts(): void {
+  /** Layout A: 标准文件列表页（/storage/allfiles） */
+  static changeLayoutsV1(): void {
       MonkeyKernel.addStyle(`
         /* Grid 容器：每列 120px，自动换行 */
         :has(> .file-grid-item) {
@@ -139,6 +140,82 @@ export default class UI {
           word-break: break-word !important;
         }
     `);
+  }
+
+  /** Layout B: 星标文件页（/storage/starredfiles），图片外多一层 div.w-16.h-16 */
+  static changeLayoutsV2(): void {
+      MonkeyKernel.addStyle(`
+        /* Grid 容器：每列 120px，自动换行 */
+        :has(> .file-grid-item) {
+          grid-template-columns: repeat(auto-fill, 120px) !important;
+          gap: 10px !important;
+        }
+
+        /* 每个 item 宽度 120px，高度由内容撑开 */
+        .file-grid-item {
+          width: 120px !important;
+          height: auto !important;
+        }
+
+        /* 解除内部固定高度的容器，让图片能撑开 */
+        .file-grid-item > .group {
+          height: auto !important;
+          min-height: 0 !important;
+        }
+
+        /* 图片居中容器去掉固定 margin */
+        .file-grid-item > .group > .flex.justify-center {
+          margin: 0 !important;
+        }
+
+        /* 图片外层容器宽度跟随 item */
+        .file-grid-item .flex.justify-center > .relative[style] {
+          width: 100% !important;
+          height: auto !important;
+        }
+
+        /* 额外图片包裹层（w-16 h-16）解除固定尺寸 */
+        .file-grid-item .flex.justify-center .w-16.h-16.relative {
+          width: 100% !important;
+          height: auto !important;
+        }
+
+        /* 图片填满容器宽度，高度固定 170px */
+        .file-grid-item img {
+          width: 100% !important;
+          height: 170px !important;
+          display: block !important;
+          object-fit: cover !important;
+          max-width: 100% !important;
+          max-height: none !important;
+        }
+
+        /* 标题容器解除 max-width 限制，最小高度占 4 行 */
+        .file-grid-item .flex.items-center.justify-center.text-xs {
+          max-width: none !important;
+          min-height: 72px !important;
+        }
+
+        /* 标题文字：最多 5 行，超出省略 */
+        .file-grid-item .flex.items-center.justify-center.text-xs span.inline-block {
+          white-space: normal !important;
+          overflow: hidden !important;
+          display: -webkit-box !important;
+          -webkit-line-clamp: 5 !important;
+          -webkit-box-orient: vertical !important;
+          word-break: break-word !important;
+        }
+    `);
+  }
+
+  /** 自动检测当前页面布局并应用对应样式 */
+  static changeLayouts(): void {
+    // 注入两套 CSS，让浏览器根据实际匹配的选择器生效
+    // V1: 标准文件列表页，图片直接挂在 .relative[style] 下
+    // V2: 星标文件页，图片外多一层 div.w-16.h-16.relative
+    // 两套规则无冲突，同时注入即可兼容两种页面
+    UI.changeLayoutsV1();
+    UI.changeLayoutsV2();
   }
 
   /** 将每个 file-grid-item 的标题文本替换为 title 属性内容 */
