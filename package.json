@@ -31,6 +31,7 @@
     "build-dev": "webpack",
     "watch": "webpack --mode=development --watch",
     "dev": "webpack-dev-server --static lib/",
+    "flush": "node scripts/bump-require-version.js && webpack-dev-server --static lib/",
     "lint": "eslint src/",
     "semantic-release": "semantic-release"
   },

@@ -1,6 +1,7 @@
 import MonkeyKernel, { $, Noty } from '../core/monkey_kernel';
 import { YYWCloud } from '../services/yyw_cloud';
 import YinXing, { METADATA_API_ENABLED } from '../services/yinxing';
+import { config } from '../config';
 
 export default class UI {
   static storeAndGetYYWID(): string | void {
@@ -23,10 +24,10 @@ export default class UI {
     }).show();
   }
 
-  static async handleCurrentPage(entryParentId: string = '1153737365202791679'): Promise<void> {
+  static async handleCurrentPage(entryParentId: string = config.entryParentId): Promise<void> {
     const yx = new YinXing({
-      videoTargetId: '1214716263562079924',
-      isoTargetId: '1227621927028387453',
+      videoTargetId: config.videoTargetId,
+      isoTargetId: config.isoTargetId,
     });
     const parentId = $('#js_data_list li[rel=item]:nth-child(1)').attr('p_id');
     await yx.handleAll(entryParentId || (parentId as string));
@@ -275,7 +276,7 @@ export default class UI {
         banngo: YinXing.parseBanngo(item.getAttribute('title') ?? ''),
       }));
     const res = (await MonkeyKernel.requestJSON({
-      url: 'https://yinxing.av2.us/v1/search',
+      url: config.metadataApiUrl,
       query: { q: banngos.map((b) => b.banngo || '').join(',') },
     })) as { results: Array<{ images: string[]; banngo: string; title: string }> };
     const movies = res.results;

@@ -2,6 +2,7 @@ import sanitize from 'sanitize-filename';
 import MonkeyKernel from '../core/monkey_kernel';
 import type { Movie } from '../types/domain';
 import { File, YYWCloud } from './yyw_cloud';
+import { config } from '../config';
 
 export { YYWCloud, File };
 export type { Movie };
@@ -45,7 +46,7 @@ export default class YinXing {
       return null;
     }
     const res = (await MonkeyKernel.requestJSON({
-      url: 'http://yinxing.com/v1/movies',
+      url: config.movieApiUrl,
       query: { q: banngo },
     })) as { results: Movie[] };
 
