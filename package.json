@@ -30,7 +30,7 @@
     "build": "NODE_ENV=production webpack --mode=production",
     "build-dev": "webpack",
     "watch": "webpack --mode=development --watch",
-    "dev": "webpack-dev-server --static dist/",
+    "dev": "webpack-dev-server --static lib/",
     "lint": "eslint src/",
     "semantic-release": "semantic-release"
   },

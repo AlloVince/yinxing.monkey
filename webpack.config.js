@@ -4,11 +4,14 @@ const path = require('path');
 /** @type {import('webpack').Configuration} */
 module.exports = {
   mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
+  target: 'web',
   entry: './src/index.ts',
   output: {
     path: path.resolve(__dirname, 'lib'),
     filename: 'index.js',
     clean: false,
+    publicPath:'http://localhost:8080/',
+    chunkLoading: false,
   },
   resolve: {
     alias: {
@@ -41,9 +44,18 @@ module.exports = {
         ]
       : []),
   ],
-  devtool: 'source-map',
+  devtool: false,
+  devServer:{
+    headers:{
+      "Access-Control-Allow-Origin":"*"
+    }
+  },
   // Don't warn about large bundle size — this is a userscript, not a web app
   performance: {
     hints: false,
+  },
+  optimization: {
+    runtimeChunk: false,
+    splitChunks: false,
   },
 };

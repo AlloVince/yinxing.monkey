@@ -15,6 +15,5 @@ declare const GM_addStyle: unknown;
 declare const GM_xmlhttpRequest: unknown;
 declare const GM_setClipboard: unknown;
 
-interface Window {
-  unsafeWindow: Window;
-}
+/** Tampermonkey sandbox global — the real page window. */
+declare const unsafeWindow: Window;
