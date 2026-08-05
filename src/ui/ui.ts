@@ -83,11 +83,11 @@ export default class UI {
   }
 
   static changeLayouts(): void {
-    MonkeyKernel.addStyle(`
-    .view-width { width: 100%; }
-    .list-thumb li { width: 140px; height: 294px;}
-    .list-thumb li .file-thumb { width: 140px; height:180px; }
-    .list-thumb li .file-name { width: 140ox; height: 57px; font-size:11px; }
+      MonkeyKernel.addStyle(`
+        :has(> .file-grid-item) {
+          grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important;
+          gap: 0px !important;
+        }
     `);
   }
 
