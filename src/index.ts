@@ -1,6 +1,5 @@
-import MonkeyKernel, { $ } from './core/monkey_kernel';
+import { $ } from './core/monkey_kernel';
 import { YYWCloud } from './services/yyw_cloud';
-import YinXing from './services/yinxing';
 import UI from './ui/ui';
 
 async function boot(): Promise<void> {
@@ -14,49 +13,8 @@ async function boot(): Promise<void> {
     return true;
   });
 
-  // Runs on every 115 page — adjust layout
-  UI.changeLayouts();
-
-  // Replace titles for existing items + watch for dynamically added ones
-  UI.replaceTitleWithAttr();
-  UI.replaceThumbnails();
-  MonkeyKernel.arrive('.file-grid-item', (item: Element) => {
-    const titleSpan = item.querySelector<HTMLSpanElement>(
-      '.flex.items-center.justify-center.text-xs span.inline-block'
-    );
-    if (!titleSpan) return;
-    const titleAttr = titleSpan.getAttribute('title');
-    if (!titleAttr) return;
-    const innerSpan = titleSpan.querySelector('span');
-    if (innerSpan) {
-      innerSpan.textContent = titleAttr;
-    } else {
-      titleSpan.textContent = titleAttr;
-    }
-    // Also replace thumbnail for this new item
-    const title = titleSpan.textContent?.trim();
-    if (title) {
-      const banngo = YinXing.parseBanngo(title);
-      if (banngo) {
-        const match = /([a-z]{2,6})-?(\d{2,5})/.exec(banngo);
-        if (match) {
-          const letters = match[1];
-          const number = match[2].padStart(5, '0');
-          const img = item.querySelector('img');
-          if (img) {
-            img.src = `https://awsimgsrc.dmm.co.jp/pics_dig/digital/video/${letters}${number}/${letters}${number}ps.jpg?w=200&h=272&f=webp`;
-          }
-        }
-      }
-    }
-  });
-
-  // When a file list thumbnail container appears, inject the menu & replace thumbnails
-  MonkeyKernel.arrive('#js_file_container ul.list-thumb', async (element) => {
-    console.info('[Yinxing:Boot]File list arrived by DOM(#js_file_container ul.list-thumb) loaded');
-    UI.initYinxingMennu();
-    await UI.autoThumbnails($(element).find('li[rel="item"]'));
-  });
+  // Initialize all UI modifications (layout, titles, thumbnails, menu, etc.)
+  UI.initUI();
 }
 
 // Start as early as possible (document-start in userscript header)

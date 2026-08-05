@@ -3,6 +3,25 @@ import { YYWCloud } from '../services/yyw_cloud';
 import YinXing, { METADATA_API_ENABLED } from '../services/yinxing';
 import { config } from '../config';
 
+/** 判断当前页面是否为 115 网盘 */
+function is115Domain(): boolean {
+  return window.location.hostname.includes('115.com');
+}
+
+/**
+ * 检测面包屑导航中是否存在「根目录 / 云下载」路径。
+ * 即 button[title="根目录"] 的父元素的下一个兄弟元素中包含 button[title="云下载"]。
+ * 只有在这个页面结构下，图片替换才生效。
+ */
+function isCloudDownloadPage(): boolean {
+  const rootBtn = document.querySelector<HTMLButtonElement>('button[title="根目录"]');
+  if (!rootBtn) return false;
+  const parent = rootBtn.parentElement;
+  if (!parent || !parent.nextElementSibling) return false;
+  const cloudBtn = parent.nextElementSibling.querySelector<HTMLButtonElement>('button[title="云下载"]');
+  return !!cloudBtn;
+}
+
 export default class UI {
   static storeAndGetYYWID(): string | void {
     const yywId: string = MonkeyKernel.getValue('yywId') as string;
@@ -219,48 +238,64 @@ export default class UI {
     UI.changeLayoutsV2();
   }
 
+  /** 将单个 file-grid-item 的标题文本替换为 title 属性内容 */
+  static replaceSingleTitle(item: Element): void {
+    const titleSpan = item.querySelector<HTMLSpanElement>(
+      '.flex.items-center.justify-center.text-xs span.inline-block'
+    );
+    if (!titleSpan) return;
+    const titleAttr = titleSpan.getAttribute('title');
+    if (!titleAttr) return;
+    const innerSpan = titleSpan.querySelector('span');
+    if (innerSpan) {
+      innerSpan.textContent = titleAttr;
+    } else {
+      titleSpan.textContent = titleAttr;
+    }
+  }
+
   /** 将每个 file-grid-item 的标题文本替换为 title 属性内容 */
   static replaceTitleWithAttr(): void {
     document.querySelectorAll('.file-grid-item').forEach((item) => {
-      const titleSpan = item.querySelector<HTMLSpanElement>(
-        '.flex.items-center.justify-center.text-xs span.inline-block'
-      );
-      if (!titleSpan) return;
-      const titleAttr = titleSpan.getAttribute('title');
-      if (!titleAttr) return;
-      // 替换最内层 span 的文本
-      const innerSpan = titleSpan.querySelector('span');
-      if (innerSpan) {
-        innerSpan.textContent = titleAttr;
-      } else {
-        titleSpan.textContent = titleAttr;
-      }
+      UI.replaceSingleTitle(item);
     });
   }
 
-  /** 根据 banngo 替换缩略图为 DMM 图片 */
+  /** 根据 banngo 替换单个 file-grid-item 的缩略图为 DMM 图片 */
+  static replaceSingleThumbnail(item: Element): void {
+    const titleSpan = item.querySelector<HTMLSpanElement>(
+      '.flex.items-center.justify-center.text-xs span.inline-block'
+    );
+    if (!titleSpan) return;
+    const title = titleSpan.textContent?.trim();
+    if (!title) return;
+
+    const banngo = YinXing.parseBanngo(title);
+    if (!banngo) return;
+
+    // banngo 格式: "abc-123" 或 "abc123"
+    const match = /([a-z]{2,6})-?(\d{2,5})/.exec(banngo);
+    if (!match) return;
+    const letters = match[1];
+    const number = match[2].padStart(5, '0');
+
+    // 特殊前缀映射：某些番号需要额外前缀
+    // 例如 vdd-203 → 24vdd00203
+    const prefixMap: Record<string, string> = {
+      vdd: '24',
+    };
+    const prefix = prefixMap[letters] ?? '';
+    const imgUrl = `https://awsimgsrc.dmm.co.jp/pics_dig/digital/video/${prefix}${letters}${number}/${prefix}${letters}${number}ps.jpg?w=200&h=272&f=webp`;
+
+    const img = item.querySelector('img');
+    if (!img) return;
+    img.src = imgUrl;
+  }
+
+  /** 根据 banngo 替换所有 file-grid-item 的缩略图为 DMM 图片 */
   static replaceThumbnails(): void {
     document.querySelectorAll('.file-grid-item').forEach((item) => {
-      const titleSpan = item.querySelector<HTMLSpanElement>(
-        '.flex.items-center.justify-center.text-xs span.inline-block'
-      );
-      if (!titleSpan) return;
-      const title = titleSpan.textContent?.trim();
-      if (!title) return;
-
-      const banngo = YinXing.parseBanngo(title);
-      if (!banngo) return;
-
-      // banngo 格式: "abc-123" 或 "abc123"
-      const match = /([a-z]{2,6})-?(\d{2,5})/.exec(banngo);
-      if (!match) return;
-      const letters = match[1];
-      const number = match[2].padStart(5, '0');
-      const imgUrl = `https://awsimgsrc.dmm.co.jp/pics_dig/digital/video/${letters}${number}/${letters}${number}ps.jpg?w=200&h=272&f=webp`;
-
-      const img = item.querySelector('img');
-      if (!img) return;
-      img.src = imgUrl;
+      UI.replaceSingleThumbnail(item);
     });
   }
 
@@ -291,6 +326,42 @@ export default class UI {
           `background-image: url( "${movie.images.find((i) => i.endsWith('ps.jpg'))}" ) !important`,
         );
       $(movieItem).find('a.name').text(`[${movie.banngo}]${movie.title}`);
+    });
+  }
+
+  /** 初始化所有 UI 修改（布局、标题、缩略图、菜单等），仅在 115.com 生效 */
+  static initUI(): void {
+    if (!is115Domain()) {
+      console.debug('[Yinxing:UI]非 115.com 页面，跳过 UI 修改');
+      return;
+    }
+
+    // 布局调整（所有 115 页面）
+    UI.changeLayouts();
+
+    // 标题替换（所有 115 页面）
+    UI.replaceTitleWithAttr();
+
+    // 图片替换仅在「根目录 / 云下载」面包屑页面生效
+    if (isCloudDownloadPage()) {
+      UI.replaceThumbnails();
+    }
+
+    // 监听动态插入的 file-grid-item：替换标题 + 缩略图
+    MonkeyKernel.arrive('.file-grid-item', (item: Element) => {
+      UI.replaceSingleTitle(item);
+
+      // 缩略图替换仅在云下载页面生效（每次动态重检）
+      if (!isCloudDownloadPage()) return;
+      UI.replaceSingleThumbnail(item);
+    });
+
+    // 监听文件列表缩略图容器出现：注入菜单 + 元数据缩略图
+    MonkeyKernel.arrive('#js_file_container ul.list-thumb', async (element) => {
+      console.info('[Yinxing:UI]File list arrived by DOM(#js_file_container ul.list-thumb) loaded');
+      UI.initYinxingMennu();
+      if (!isCloudDownloadPage()) return;
+      await UI.autoThumbnails($(element).find('li[rel="item"]'));
     });
   }
 }
