@@ -84,11 +84,80 @@ export default class UI {
 
   static changeLayouts(): void {
       MonkeyKernel.addStyle(`
+        /* Grid 容器：每列 120px，自动换行 */
         :has(> .file-grid-item) {
-          grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important;
-          gap: 0px !important;
+          grid-template-columns: repeat(auto-fill, 120px) !important;
+          gap: 10px !important;
+        }
+
+        /* 每个 item 宽度 120px，高度由内容撑开 */
+        .file-grid-item {
+          width: 120px !important;
+          height: auto !important;
+        }
+
+        /* 解除内部固定高度的容器，让图片能撑开 */
+        .file-grid-item > .group {
+          height: auto !important;
+          min-height: 0 !important;
+        }
+
+        /* 图片居中容器去掉固定 margin */
+        .file-grid-item > .group > .flex.justify-center {
+          margin: 0 !important;
+        }
+
+        /* 图片外层容器宽度跟随 item（100% = 120px），高度由图片撑开 */
+        .file-grid-item .flex.justify-center > .relative[style] {
+          width: 100% !important;
+          height: auto !important;
+        }
+
+        /* 图片填满容器宽度，高度固定 170px */
+        .file-grid-item img {
+          width: 100% !important;
+          height: 170px !important;
+          display: block !important;
+          object-fit: cover !important;
+          max-width: 100% !important;
+          max-height: none !important;
+        }
+
+        /* 标题容器解除 max-width 限制，最小高度占 4 行 */
+        .file-grid-item .flex.items-center.justify-center.text-xs {
+          max-width: none !important;
+          min-height: 72px !important;
+        }
+
+        /* 标题文字：最多 5 行，超出省略 */
+        .file-grid-item .flex.items-center.justify-center.text-xs span.inline-block {
+          white-space: normal !important;
+          overflow: hidden !important;
+          display: -webkit-box !important;
+          -webkit-line-clamp: 5 !important;
+          -webkit-box-orient: vertical !important;
+          word-break: break-word !important;
         }
     `);
+  }
+
+  /** 将每个 file-grid-item 的标题文本替换为 title 属性内容 */
+  static replaceTitleWithAttr(): void {
+    document.querySelectorAll('.file-grid-item').forEach((item) => {
+      const titleSpan = item.querySelector<HTMLSpanElement>(
+        '.flex.items-center.justify-center.text-xs span.inline-block'
+      );
+      if (!titleSpan) return;
+      const titleAttr = titleSpan.getAttribute('title');
+      if (!titleAttr) return;
+      // 替换最内层 span 的文本
+      const innerSpan = titleSpan.querySelector('span');
+      if (innerSpan) {
+        innerSpan.textContent = titleAttr;
+      } else {
+        titleSpan.textContent = titleAttr;
+      }
+    });
   }
 
   static async autoThumbnails($movieItems: JQuery): Promise<void> {
