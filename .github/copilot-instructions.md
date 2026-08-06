@@ -17,6 +17,34 @@ GM_userscript 项目，运行在 115 网盘网页端。TypeScript + Webpack 5 �
 - 布局方法放在 `UI.changeLayoutsV1()` / `V2()` 中，`changeLayouts()` 同时调用两者
 - 新增布局版本时，在 `UI` 类中新建 `changeLayoutsV3()` 并在 `changeLayouts()` 中调用
 
+### UI 初始化
+
+- 所有 UI 修改（布局、标题、缩略图、菜单）统一在 `UI.initUI()` 中初始化
+- `index.ts` 保持轻量，只做入口引导（磁力链接事件 + `UI.initUI()` 调用）
+- 标题替换使用 `UI.replaceSingleTitle(item)` 操作单个元素，`UI.replaceTitleWithAttr()` 遍历全部
+- 缩略图替换使用 `UI.replaceSingleThumbnail(item)` 操作单个元素，`UI.replaceThumbnails()` 遍历全部
+- `arrive` 回调中应调用单元素方法而非内联重复逻辑
+
+### 封面替换目录
+
+- 封面替换的生效目录通过 `isCoverAllowedPage()` 判断，从 GM 存储读取 `yinxingCoverFolders`
+- 用户可在银杏下拉菜单中设置逗号分割的文件夹名，未设置时默认匹配「云下载」
+- 新增封面替换目录判断时，修改 `isCoverAllowedPage()` 即可
+
+### 缩略图 URL 生成
+
+- DMM 缩略图 URL 在 `replaceSingleThumbnail()` 中生成
+- 特殊番号映射使用 `specialMap`（按完整番号 ID 匹配），而非字母前缀匹配
+- 例如 `vdd-203` → `specialMap["vdd00203"] = "24vdd00203"`
+- 新增特殊映射时在 `specialMap` 中添加条目
+
+### 银杏下拉菜单
+
+- 通过 `UI.initYinxingDropdown()` 注入到 `div.sticky > div.flex` 导航栏末尾
+- 样式通过 `MonkeyKernel.addStyle()` 注入
+- 点击「银杏」按钮切换显示，点击外部区域自动关闭
+- 新增菜单项时在 `initYinxingDropdown()` 的 HTML 模板中添加
+
 ### 配置读取
 
 - 本地环境变量通过 `src/config.ts` 的 `config` 对象读取，而非硬编码

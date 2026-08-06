@@ -1,4 +1,4 @@
-import MonkeyKernel, { $, Noty } from '../core/monkey_kernel';
+import MonkeyKernel, { $ } from '../core/monkey_kernel';
 import { YYWCloud } from '../services/yyw_cloud';
 import YinXing, { METADATA_API_ENABLED } from '../services/yinxing';
 import { config } from '../config';
@@ -9,38 +9,33 @@ function is115Domain(): boolean {
 }
 
 /**
- * 检测面包屑导航中是否存在「根目录 / 云下载」路径。
- * 即 button[title="根目录"] 的父元素的下一个兄弟元素中包含 button[title="云下载"]。
- * 只有在这个页面结构下，图片替换才生效。
+ * 检测面包屑导航是否匹配用户设置的封面替换文件夹。
+ * 读取 GM 存储中的 yinxingCoverFolders（逗号分割的文件夹名），
+ * 检查当前面包屑中「根目录」的下一个节点是否匹配其中任意一个。
+ * 未设置时默认匹配「云下载」。
  */
-function isCloudDownloadPage(): boolean {
+function isCoverAllowedPage(): boolean {
+  const savedFolders = MonkeyKernel.getValue('yinxingCoverFolders') as string;
+  const folderNames = savedFolders
+    ? savedFolders.split(',').map(s => s.trim()).filter(Boolean)
+    : ['云下载'];
+
   const rootBtn = document.querySelector<HTMLButtonElement>('button[title="根目录"]');
   if (!rootBtn) return false;
   const parent = rootBtn.parentElement;
   if (!parent || !parent.nextElementSibling) return false;
-  const cloudBtn = parent.nextElementSibling.querySelector<HTMLButtonElement>('button[title="云下载"]');
-  return !!cloudBtn;
+
+  return folderNames.some((name) => {
+    const btn = parent.nextElementSibling!.querySelector<HTMLButtonElement>(`button[title="${name}"]`);
+    return !!btn;
+  });
 }
 
 export default class UI {
+  /** 获取已保存的 115 用户 ID（不再弹出输入框，由下拉菜单替代） */
   static storeAndGetYYWID(): string | void {
-    const yywId: string = MonkeyKernel.getValue('yywId') as string;
-    if (yywId) {
-      return yywId;
-    }
-    return new Noty({
-      text: '银杏:请输入115用户ID并保存 <br/> <input id="yinxing_115_uid" type="text">',
-      closeWith: ['button'],
-      buttons: [
-        Noty.button('保存', 'btn btn-success', () => {
-          MonkeyKernel.setValue('yywId', $('#yinxing_115_uid').val() as string);
-          MonkeyKernel.notify(`115用户ID已保存为${MonkeyKernel.getValue('yywId')}, 请刷新界面`);
-        }),
-        Noty.button('登录115', 'btn btn-info', () => {
-          MonkeyKernel.openTab('https://115.com');
-        }),
-      ],
-    }).show();
+    const yywId = MonkeyKernel.getValue('yywId') as string;
+    return yywId || undefined;
   }
 
   static async handleCurrentPage(entryParentId: string = config.entryParentId): Promise<void> {
@@ -279,13 +274,13 @@ export default class UI {
     const letters = match[1];
     const number = match[2].padStart(5, '0');
 
-    // 特殊前缀映射：某些番号需要额外前缀
+    // 特殊番号映射：某些番号在 DMM 上的产品 ID 与标准格式不同
     // 例如 vdd-203 → 24vdd00203
-    const prefixMap: Record<string, string> = {
-      vdd: '24',
+    const specialMap: Record<string, string> = {
+      'vdd203': '24vdd00203',
     };
-    const prefix = prefixMap[letters] ?? '';
-    const imgUrl = `https://awsimgsrc.dmm.co.jp/pics_dig/digital/video/${prefix}${letters}${number}/${prefix}${letters}${number}ps.jpg?w=200&h=272&f=webp`;
+    const productId = specialMap[`${letters}${number}`] ?? `${letters}${number}`;
+    const imgUrl = `https://awsimgsrc.dmm.co.jp/pics_dig/digital/video/${productId}/${productId}ps.jpg?w=200&h=272&f=webp`;
 
     const img = item.querySelector('img');
     if (!img) return;
@@ -329,6 +324,141 @@ export default class UI {
     });
   }
 
+  /** 注入银杏专属下拉菜单到顶部导航栏 */
+  static initYinxingDropdown(): void {
+    if ($('#yinxingDropdown').length > 0) return;
+
+    MonkeyKernel.addStyle(`
+      #yinxingDropdownContent {
+        display: none;
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        z-index: 50;
+        min-width: 280px;
+        padding: 12px;
+      }
+      #yinxingDropdownContent.show {
+        display: block;
+      }
+      #yinxingDropdownContent label {
+        font-size: 13px;
+        color: #6b7280;
+        display: block;
+        margin-bottom: 4px;
+      }
+      #yinxingDropdownContent .field-row {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      #yinxingDropdownContent .field-row + .field-row {
+        margin-top: 8px;
+      }
+      #yinxingDropdownContent .input-row {
+        display: flex;
+        gap: 4px;
+      }
+      #yinxingDropdownContent input {
+        flex: 1;
+        border: 1px solid #d1d5db;
+        border-radius: 4px;
+        padding: 4px 8px;
+        font-size: 13px;
+        outline: none;
+      }
+      #yinxingDropdownContent input:focus {
+        border-color: #2777F8;
+      }
+      #yinxingDropdownContent .save-btn {
+        background: #2777F8;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 4px 12px;
+        font-size: 13px;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      #yinxingDropdownContent .save-btn:hover {
+        background: #1a5fc7;
+      }
+      #yinxingDropdownContent .divider {
+        border-bottom: 1px solid #f3f4f6;
+        margin: 8px 0;
+      }
+    `);
+
+    const savedUid = (MonkeyKernel.getValue('yywId') as string) || '';
+    const savedFolders = (MonkeyKernel.getValue('yinxingCoverFolders') as string) || '';
+
+    const $dropdown = $(`
+      <div id="yinxingDropdown" style="position:relative;display:inline-flex;align-items:center;">
+        <button id="yinxingDropdownToggle" class="px-6 font-medium transition-all cursor-pointer flex items-center relative text-[#64707A] hover:text-[#1A2734]" style="font-size:16px;">银杏</button>
+        <div id="yinxingDropdownContent">
+          <div class="field-row">
+            <label>115 ID</label>
+            <div class="input-row">
+              <input id="yinxingUidInput" type="text" value="${savedUid}" placeholder="输入115用户ID" />
+              <button class="save-btn" id="yinxingUidSave">保存</button>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="field-row">
+            <label>封面仅限</label>
+            <div class="input-row">
+              <input id="yinxingCoverInput" type="text" value="${savedFolders}" placeholder="文件夹名，逗号分割" />
+              <button class="save-btn" id="yinxingCoverSave">保存</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `);
+
+    $('div.sticky > div.flex').append($dropdown);
+
+    // 点击「银杏」切换下拉菜单
+    $('#yinxingDropdownToggle').on('click', (e) => {
+      e.stopPropagation();
+      $('#yinxingDropdownContent').toggleClass('show');
+    });
+
+    // 点击外部关闭下拉菜单
+    $(document).on('click', (e) => {
+      if (!$(e.target).closest('#yinxingDropdown').length) {
+        $('#yinxingDropdownContent').removeClass('show');
+      }
+    });
+
+    // 保存 115 ID
+    $('#yinxingUidSave').on('click', () => {
+      const val = ($('#yinxingUidInput').val() as string || '').trim();
+      if (val) {
+        MonkeyKernel.setValue('yywId', val);
+        MonkeyKernel.notify(`115用户ID已保存为 ${val}`);
+      } else {
+        MonkeyKernel.deleteValue('yywId');
+        MonkeyKernel.notify('已清除115用户ID');
+      }
+    });
+
+    // 保存封面仅限文件夹
+    $('#yinxingCoverSave').on('click', () => {
+      const val = ($('#yinxingCoverInput').val() as string || '').trim();
+      if (val) {
+        MonkeyKernel.setValue('yinxingCoverFolders', val);
+        MonkeyKernel.notify(`封面仅限已保存: ${val}`);
+      } else {
+        MonkeyKernel.deleteValue('yinxingCoverFolders');
+        MonkeyKernel.notify('已清除封面仅限设置');
+      }
+    });
+  }
+
   /** 初始化所有 UI 修改（布局、标题、缩略图、菜单等），仅在 115.com 生效 */
   static initUI(): void {
     if (!is115Domain()) {
@@ -342,8 +472,11 @@ export default class UI {
     // 标题替换（所有 115 页面）
     UI.replaceTitleWithAttr();
 
-    // 图片替换仅在「根目录 / 云下载」面包屑页面生效
-    if (isCloudDownloadPage()) {
+    // 注入银杏下拉菜单（页面初始已存在 sticky > flex，直接调用）
+    UI.initYinxingDropdown();
+
+    // 图片替换仅在匹配的面包屑页面生效
+    if (isCoverAllowedPage()) {
       UI.replaceThumbnails();
     }
 
@@ -351,8 +484,8 @@ export default class UI {
     MonkeyKernel.arrive('.file-grid-item', (item: Element) => {
       UI.replaceSingleTitle(item);
 
-      // 缩略图替换仅在云下载页面生效（每次动态重检）
-      if (!isCloudDownloadPage()) return;
+      // 缩略图替换仅在匹配的面包屑页面生效（每次动态重检）
+      if (!isCoverAllowedPage()) return;
       UI.replaceSingleThumbnail(item);
     });
 
@@ -360,7 +493,7 @@ export default class UI {
     MonkeyKernel.arrive('#js_file_container ul.list-thumb', async (element) => {
       console.info('[Yinxing:UI]File list arrived by DOM(#js_file_container ul.list-thumb) loaded');
       UI.initYinxingMennu();
-      if (!isCloudDownloadPage()) return;
+      if (!isCoverAllowedPage()) return;
       await UI.autoThumbnails($(element).find('li[rel="item"]'));
     });
   }

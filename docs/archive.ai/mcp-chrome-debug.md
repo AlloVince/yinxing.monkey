@@ -16,9 +16,7 @@
 在终端执行（每次调试前确认已运行）：
 
 ```bash
-/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
-  --remote-debugging-port=9222 \
-  --user-data-dir=$HOME/chrome-dev-profile
+/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222 --user-data-dir=$HOME/chrome-dev-profile
 ```
 
 - **Profile**: `$HOME/chrome-dev-profile`

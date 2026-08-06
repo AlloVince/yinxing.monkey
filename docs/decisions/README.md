@@ -18,3 +18,4 @@
 | [ADR-003](./0003-env-configuration.md) | 本地环境配置外部化 (.env) | 已实施 |
 | [ADR-004](./0004-layout-versioning.md) | 115 页面布局版本化 (V1/V2) | 已实施 |
 | [ADR-005](./0005-tm-require-cache-flush.md) | TM @require 缓存刷新方案 | 已实施 |
+| [ADR-006](./0006-ui-refactoring-and-dropdown.md) | UI 重构与银杏下拉菜单 | 已实施 |

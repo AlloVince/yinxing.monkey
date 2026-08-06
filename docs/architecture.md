@@ -43,9 +43,12 @@ Tampermonkey 沙箱
 
 ### `src/ui/ui.ts` — UI 类
 
-- 注入操作菜单、调整页面布局（CSS 覆盖）、替换缩略图
+- 入口 `initUI()` 集中管理所有 UI 修改（布局、标题、缩略图、菜单）
+- 注入银杏下拉菜单到导航栏（115 ID 设置、封面仅限文件夹配置）
 - 磁力链接复制与离线下载触发
 - 布局样式分 V1/V2 两套，自动检测页面结构后应用
+- 提供单元素操作方法 `replaceSingleTitle()` / `replaceSingleThumbnail()` 供 `arrive` 回调复用
+- 封面替换目录通过 `isCoverAllowedPage()` 动态判断，支持用户自定义（默认「云下载」）
 
 ### `src/config.ts` — 应用配置
 
@@ -77,14 +80,18 @@ boot() → UI.handleCurrentPage()
         → 无番号? → 跳过
 ```
 
-### 布局调整
+### 布局调整与 UI 初始化
 
 ```
-boot() → UI.changeLayouts()
-  → 检测页面结构 (是否有 .w-16.h-16.relative 包裹层)
-  → 注入对应 CSS (V1 或 V2)
-  → UI.replaceTitleWithAttr() 替换标题文本
-  → UI.replaceThumbnails() 替换缩略图
+boot() → UI.initUI()
+  ├─ UI.changeLayouts()
+  │   → 检测页面结构 (是否有 .w-16.h-16.relative 包裹层)
+  │   → 注入对应 CSS (V1 或 V2)
+  ├─ UI.replaceTitleWithAttr() 替换标题文本
+  ├─ UI.initYinxingDropdown() 注入银杏下拉菜单
+  ├─ isCoverAllowedPage()? → UI.replaceThumbnails() 替换缩略图
+  ├─ arrive('.file-grid-item') → replaceSingleTitle + replaceSingleThumbnail
+  └─ arrive('#js_file_container ul.list-thumb') → initYinxingMennu + autoThumbnails
 ```
 
 ## 外部依赖

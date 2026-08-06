@@ -69,10 +69,13 @@ module.exports = {
     }),
   ],
   devtool: false,
-  devServer:{
-    headers:{
-      "Access-Control-Allow-Origin":"*"
-    }
+  devServer: {
+    hot: false,
+    liveReload: false,
+    client: false,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+    },
   },
   // Don't warn about large bundle size — this is a userscript, not a web app
   performance: {

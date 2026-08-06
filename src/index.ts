@@ -20,5 +20,6 @@ async function boot(): Promise<void> {
 // Start as early as possible (document-start in userscript header)
 // https://greasyfork.org/en/forum/discussion/20558
 $(document).ready(() => {
+  alert(1);
   void boot();
 });
