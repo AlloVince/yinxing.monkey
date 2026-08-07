@@ -15,5 +15,14 @@ declare const GM_addStyle: unknown;
 declare const GM_xmlhttpRequest: unknown;
 declare const GM_setClipboard: unknown;
 
+/** Tampermonkey `GM_info` object — contains script metadata incl. @require URLs. */
+declare const GM_info: {
+  script: {
+    /** @require URLs declared in the userscript header. */
+    requires: string[];
+    [key: string]: unknown;
+  };
+};
+
 /** Tampermonkey sandbox global — the real page window. */
 declare const unsafeWindow: Window;

@@ -35,6 +35,15 @@ npm run flush
 
 这会自动递增 `@require` URL 版本号并重启 TM Service Worker。
 
+**验证方法**：刷新 115 页面后，在控制台查看 `[Yinxing:boot] 脚本注入成功 v{version}`，版本号应与 `@require` URL 中的 `v=` 参数一致。
+
+**注意**：`npm run flush` 同时更新 TM 存储中的 `@source`（脚本源码）和 `@meta`（解析后的元数据缓存，包含 `header` 字段）。仅修改 `@source` 不会更新 `GM_info.script.header`，导致日志版本号不变。
+
+**如果 flush 不生效**：
+1. 确认调试 Chrome 正在运行（`curl -s http://127.0.0.1:9222/json/version`）
+2. 确认 TM Service Worker 在页面列表中（`type: service_worker`）
+3. 可在 TM 管理面板中手动保存脚本（Ctrl+S）作为回退方案
+
 ### 查看控制台日志
 
 使用 MCP 的 `list_console_messages` 工具查看 115 页面控制台输出。脚本日志以 `[Yinxing:xxx]` 前缀输出。
@@ -58,6 +67,8 @@ npm run flush
 - TM 会缓存 `@require` 加载的外部脚本
 - 修改 webpack 后需通过 `npm run flush` 递增版本号强制刷新
 - 或在 TM 管理面板中编辑脚本 → Ctrl+S 保存触发重新缓存
+- `GM_info.script.header` 从 TM 存储的 `@meta` 缓存读取，而非 `@source`（原始源码）。
+  `npm run flush` 必须同时更新 `@source` 和 `@meta` 才能生效
 
 ### 115 页面动态渲染
 
@@ -72,6 +83,7 @@ npm run flush
 | `Error: Automatic publicPath is not supported` | webpack 5 自动 publicPath 推断失败 | 检查 `webpack.config.js` 中 `publicPath: ''` |
 | `TypeError: gms.getValue is not a function` | GM API 查找失败 | 检查 `@grant` 声明是否完整 |
 | 脚本不工作但无报错 | TM 缓存了旧版 `@require` | 运行 `npm run flush` |
+| `npm run flush` 显示版本号递增但页面未更新 | TM 的 `@meta` 缓存未同步更新 | 2026-08-07 已修复，`bump-require-version.js` 同时写入 `@source` 和 `@meta` |
 | MCP 连不上 | 调试 Chrome 未启动或端口被占用 | 确认 `curl -s http://127.0.0.1:9222/json/version` 有响应 |
 | 页面布局不对 | 页面结构版本与注入的 CSS 不匹配 | `changeLayouts()` 会自动检测，检查 V1/V2 选择器 |
 

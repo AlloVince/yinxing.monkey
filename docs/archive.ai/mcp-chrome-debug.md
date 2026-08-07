@@ -48,6 +48,61 @@
 - 参数是 `--browser-url`（下划线形式在 pnpm/yargs 场景下会被自动转换，但推荐 `--browser-url` 连字符形式）
 - 通过 `--browser-url http://127.0.0.1:9222` **连接**到已运行的调试 Chrome，**不会**自己启动 Chrome
 
+## 调试前自检流程（AI Agent 必须执行）
+
+> 每次用户要求通过 MCP 调试脚本时，AI Agent **必须先完成以下自检**，确认与调试 Chrome 的连接正常，再告知用户开始操作。
+
+### Step 1: 确认调试 Chrome 正在运行
+
+```bash
+curl -s http://127.0.0.1:9222/json/version
+```
+
+如果失败，告知用户先启动调试 Chrome：
+
+```bash
+/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
+  --remote-debugging-port=9222 \
+  --user-data-dir=$HOME/chrome-dev-profile
+```
+
+### Step 2: 确认 MCP 页面列表可达
+
+用 `mcp_chrome_devtoo_list_pages` 列出页面。**至少应看到 115 的标签页**。
+
+如果列表为空，说明 MCP 连接异常，需要检查 `.vscode/mcp.json` 配置或重启 VS Code MCP 服务。
+
+### Step 3: 选中目标页面
+
+用 `mcp_chrome_devtoo_select_page` 选中 115 标签页。
+
+### Step 4: 验证脚本已注入
+
+用 `mcp_chrome_devtoo_evaluate_script` 执行：
+
+```js
+() => {
+  const styles = Array.from(document.querySelectorAll('style')).map(s => s.textContent?.slice(0, 80)).filter(Boolean);
+  const yinxingStyles = styles.filter(s => s?.includes('yinxing') || s?.includes('银杏'));
+  return { yinxingStyleCount: yinxingStyles.length, totalStyleCount: styles.length };
+}
+```
+
+- `yinxingStyleCount > 0` → 脚本已注入成功
+- 如果为 0，提示用户刷新页面或检查 TM 中脚本是否启用
+
+### Step 5: 验证控制台日志可达
+
+用 `mcp_chrome_devtoo_list_console_messages` 查看日志。
+
+**确认能看到 `[Yinxing:boot]` 日志后再提问用户**，避免用户说"已经看到了"而 AI 说"看不到"。
+
+### Step 6: 通知用户
+
+所有检查通过后，告知用户调试环境就绪，可以开始操作。
+
+> ⚠️ **重要**：检查过程中如果发现任何异常（页面打不开、连接失败、脚本未注入），**先尝试自行排查**（如刷新页面、重新选中页面），不要直接告诉用户"看不到"。
+
 ## 使用 chrome-devtools MCP 工具
 
 MCP 连上后，会出现以下工具（`mcp_chrome_devtoo_*`）：
@@ -84,6 +139,16 @@ typeof GM_info !== 'undefined'   // 是否有脚本信息
 3. **调试前先确认**：
    - ✅ 调试 Chrome 已运行（`curl -s http://127.0.0.1:9222/json/version`）
    - ✅ MCP 已连上（可用 `list_pages` 看到调试 Chrome 的标签页）
+
+4. **浏览器重启/重连会导致历史日志丢失**
+   - 如果浏览器重启过（`Note: the browser was restarted or reconnected since the last call`），**之前的控制台日志会被清空**
+   - 此时 `list_console_messages`（即使是 `includePreservedMessages: true`）也读不到重启前的日志
+   - **必须在页面刷新后重新等待脚本注入，再读取日志**
+
+5. **脚本注入的可见证据**
+   - `document.querySelectorAll('script')` 查不到 `@require` 脚本（TM 沙箱不是标准 `<script>` 注入）
+   - `typeof GM` / `typeof unsafeWindow` 在沙箱里可能为 `false`，不能作为"脚本未注入"的依据
+   - **可靠的判断方式**：检查银杏注入的 `<style>` 标签（含 `#yinxingDropdownContent` 等），或看 `[Yinxing:boot]` 控制台日志
 
 ## 验证命令
 

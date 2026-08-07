@@ -15,6 +15,11 @@ function is115Domain(): boolean {
  * 未设置时默认匹配「云下载」。
  */
 function isCoverAllowedPage(): boolean {
+  // 星标文件页始终启用封面替换
+  if (window.location.pathname.includes('/storage/starredfiles')) {
+    return true;
+  }
+
   const savedFolders = MonkeyKernel.getValue('yinxingCoverFolders') as string;
   const folderNames = savedFolders
     ? savedFolders.split(',').map(s => s.trim()).filter(Boolean)
@@ -419,7 +424,7 @@ export default class UI {
       </div>
     `);
 
-    $('div.sticky > div.flex').append($dropdown);
+    $('div.sticky > div.flex.justify-evenly').append($dropdown);
 
     // 点击「银杏」切换下拉菜单
     $('#yinxingDropdownToggle').on('click', (e) => {
@@ -472,8 +477,13 @@ export default class UI {
     // 标题替换（所有 115 页面）
     UI.replaceTitleWithAttr();
 
-    // 注入银杏下拉菜单（页面初始已存在 sticky > flex，直接调用）
+    // 注入银杏下拉菜单（直接调用 + arrive 监听，覆盖首次渲染和后续 React 重渲染）
+    // 直接调用：处理首次渲染时导航栏已存在的情况
     UI.initYinxingDropdown();
+    // arrive 监听：处理导航栏尚未渲染或 React 重渲染清除手动追加 DOM 的情况
+    MonkeyKernel.arrive('div.sticky > div.flex.justify-evenly', () => {
+      UI.initYinxingDropdown();
+    });
 
     // 图片替换仅在匹配的面包屑页面生效
     if (isCoverAllowedPage()) {

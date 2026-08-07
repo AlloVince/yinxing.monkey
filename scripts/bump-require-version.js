@@ -86,6 +86,7 @@ async function main() {
           return v.includes('@name') && v.includes('${scriptName}');
         });
         if (!sourceKey) return { error: 'Script "${scriptName}" not found in TM storage' };
+        const metaKey = sourceKey.replace('@source', '@meta');
         const entry = all[sourceKey];
         const source = entry.value;
         const lines = source.split('\\n');
@@ -96,9 +97,30 @@ async function main() {
         const currentVer = match ? parseInt(match[1], 10) : 0;
         const newVer = currentVer + 1;
         const newLine = currentLine.replace(/v=\\d+/, 'v=' + newVer);
+        // 1) Update @source (script source code)
         lines[reqIdx] = newLine;
         entry.value = lines.join('\\n');
         await chrome.storage.local.set({ [sourceKey]: entry });
+        // 2) Also update @meta (parsed header cache) — GM_info.script.header reads from here
+        const metaEntry = all[metaKey];
+        if (metaEntry && metaEntry.value) {
+          const meta = metaEntry.value;
+          if (meta.header) {
+            const newMetaHeader = meta.header.replace(/v=\\d+/, 'v=' + newVer);
+            meta.header = newMetaHeader;
+            metaEntry.value = meta;
+            await chrome.storage.local.set({ [metaKey]: metaEntry });
+          }
+        }
+        // 3) Verify @source write was persisted
+        const verify = await chrome.storage.local.get(sourceKey);
+        const verifySource = verify[sourceKey]?.value || '';
+        const verifyLines = verifySource.split('\\n');
+        const verifyReq = verifyLines.find(l => l.includes('@require') && l.includes('${devServerHost}'));
+        const verifyMatch = verifyReq?.match(/v=(\\d+)/);
+        if (!verifyMatch || parseInt(verifyMatch[1], 10) !== newVer) {
+          return { error: '写入验证失败，存储未持久化' };
+        }
         return { oldVer: currentVer, newVer, oldLine: currentLine.trim(), newLine: newLine.trim() };
       })()
     `,
@@ -124,7 +146,9 @@ async function main() {
   console.log(`   ${result.newLine}`);
 
   // 4. Restart the TM Service Worker so it picks up the new config
-  console.log('🔄 Restarting Tampermonkey Service Worker...');
+  console.log('🔄 Restarting Tampermonkey Service Worker (waiting 3s for storage flush)...');
+  // 等待足够长的时间确保 IndexedDB 写入完全刷盘后再重启
+  await new Promise(r => setTimeout(r, 3000));
   // chrome.runtime.reload() kills the SW immediately, so fire-and-forget
   await send('Runtime.evaluate', {
     expression: `chrome.runtime.reload()`,

@@ -58,7 +58,7 @@
 
 - **Lint**: `npm run lint`
 - **构建验证**: `npm run build`
-- **运行时调试**: 通过 Chrome DevTools MCP 连接调试 Chrome（见 `docs/troubleshooting.md`）
+- **运行时调试**: 通过 Chrome DevTools MCP 连接调试 Chrome（见 `docs/troubleshooting.md`） 与常规方式不同，在需要使用 MCP 时 **必须** 先读此文档
 - **无单元测试**：项目当前无测试框架
 
 ## 文档索引
