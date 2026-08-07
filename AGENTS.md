@@ -53,6 +53,7 @@
 - **中文 UI**：用户界面文本全部为中文
 - **日志前缀**：`console.debug('[Yinxing:xxx]')` 格式
 - **配置外部化**：本地环境变量通过 `.env` + webpack DefinePlugin 注入
+- **调试版本号**：每次修改代码后，递增 `src/ui/ui.ts` 中 `initUI()` 的 `DEBUG_VERSION` 常量（如 `v3` → `v4`），用于绕过 TM `@require` 缓存确认注入的是最新代码
 
 ## 测试方式
 

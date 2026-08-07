@@ -66,7 +66,7 @@ export default class UI {
         <option value="downloads">同步</option>
       </select>
     `)
-      .insertBefore('#js_upload_btn')
+      .insertBefore('#js_file_container .list-header-actions')
       .on('change', (e) => {
         const action = $(e.currentTarget).val();
         if (action === 'handleFiles') {
@@ -343,7 +343,7 @@ export default class UI {
         border: 1px solid #e5e7eb;
         border-radius: 8px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        z-index: 50;
+        z-index: 99999;
         min-width: 280px;
         padding: 12px;
       }
@@ -402,8 +402,8 @@ export default class UI {
     const savedFolders = (MonkeyKernel.getValue('yinxingCoverFolders') as string) || '';
 
     const $dropdown = $(`
-      <div id="yinxingDropdown" style="position:relative;display:inline-flex;align-items:center;">
-        <button id="yinxingDropdownToggle" class="px-6 font-medium transition-all cursor-pointer flex items-center relative text-[#64707A] hover:text-[#1A2734]" style="font-size:16px;">银杏</button>
+      <div id="yinxingDropdown" style="position:fixed;top:12px;right:200px;z-index:99999;display:inline-flex;align-items:center;">
+        <button id="yinxingDropdownToggle" class="px-6 font-medium transition-all cursor-pointer flex items-center relative text-[#64707A] hover:text-[#1A2734]" style="font-size:16px;background:#2777F8;color:white;border:none;border-radius:4px;padding:6px 12px;">银杏</button>
         <div id="yinxingDropdownContent">
           <div class="field-row">
             <label>115 ID</label>
@@ -424,7 +424,7 @@ export default class UI {
       </div>
     `);
 
-    $('div.sticky > div.flex.justify-evenly').append($dropdown);
+    $('body').append($dropdown);
 
     // 点击「银杏」切换下拉菜单
     $('#yinxingDropdownToggle').on('click', (e) => {
@@ -466,6 +466,18 @@ export default class UI {
 
   /** 初始化所有 UI 修改（布局、标题、缩略图、菜单等），仅在 115.com 生效 */
   static initUI(): void {
+    // DEBUG: 版本标记，每次修改代码时更新此值
+    const DEBUG_VERSION = 'v4';
+    console.debug('[Yinxing:Debug]', DEBUG_VERSION);
+    const debugDiv = document.getElementById('yinxingDebug') || (() => {
+      const d = document.createElement('div');
+      d.id = 'yinxingDebug';
+      d.style.display = 'none';
+      document.body.appendChild(d);
+      return d;
+    })();
+    debugDiv.setAttribute('data-version', DEBUG_VERSION);
+
     if (!is115Domain()) {
       console.debug('[Yinxing:UI]非 115.com 页面，跳过 UI 修改');
       return;
@@ -477,13 +489,8 @@ export default class UI {
     // 标题替换（所有 115 页面）
     UI.replaceTitleWithAttr();
 
-    // 注入银杏下拉菜单（直接调用 + arrive 监听，覆盖首次渲染和后续 React 重渲染）
-    // 直接调用：处理首次渲染时导航栏已存在的情况
+    // 注入银杏下拉菜单 — 直接追加到 body，fixed 定位不会被 React 重渲染影响
     UI.initYinxingDropdown();
-    // arrive 监听：处理导航栏尚未渲染或 React 重渲染清除手动追加 DOM 的情况
-    MonkeyKernel.arrive('div.sticky > div.flex.justify-evenly', () => {
-      UI.initYinxingDropdown();
-    });
 
     // 图片替换仅在匹配的面包屑页面生效
     if (isCoverAllowedPage()) {

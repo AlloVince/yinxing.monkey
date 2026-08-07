@@ -63,6 +63,15 @@ GM_userscript 项目，运行在 115 网盘网页端。TypeScript + Webpack 5 �
 - `console.debug('[Yinxing:xxx]')` 前缀日志
 - `@grant` 声明在 `scripts/release.js` 中维护，新增 GM API 时需同步添加
 
+### 调试版本号约定
+
+- `src/ui/ui.ts` 的 `initUI()` 中定义了 `DEBUG_VERSION` 常量（如 `'v4'`）
+- **每次修改代码后，必须递增此版本号**（如 `v3` → `v4`）
+- 脚本启动时会 `console.debug('[Yinxing:Debug]', DEBUG_VERSION)` 输出版本号
+- 同时在页面中注入 `<div id="yinxingDebug" data-version="v4">` 供 AI Agent 通过 DOM 检查
+- 修改完成后，提示用户「请刷新页面并检查 Console 中的 `[Yinxing:Debug]` 版本号」
+- 此机制用于绕过 Tampermonkey `@require` 缓存，确认注入的是最新代码
+
 ## 文档索引
 
 | 文档 | 用途 |
