@@ -64,4 +64,5 @@ dist
 .DS_Store
 lib
 yarn.lock
+package-lock.json
 index.js

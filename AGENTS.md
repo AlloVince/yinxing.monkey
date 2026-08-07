@@ -18,7 +18,8 @@
 | 语言 | TypeScript 5.8+ (strict, target es2023) |
 | 构建 | Webpack 5 + ts-loader + style-loader + css-loader |
 | 检查 | ESLint 9 flat config + typescript-eslint |
-| Node | 24.x |
+| Node | 24.x（fnm 管理） |
+| 包管理 | pnpm |
 | 发布 | semantic-release → npm → jsDelivr CDN |
 | 许可证 | GPL-3.0 |
 

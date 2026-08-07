@@ -81,3 +81,9 @@ GM_userscript 项目，运行在 115 网盘网页端。TypeScript + Webpack 5 �
 | `docs/development.md` | 环境准备、安装、启动、开发流程 |
 | `docs/troubleshooting.md` | 调试方法、已知问题、常见错误 |
 | `docs/decisions/` | 架构决策记录 (ADR) |
+
+## 开发环境
+
+- **Node.js 版本管理**: 使用 `fnm`（`.node-version` 文件中定义了版本 `24`）
+- **包管理器**: 使用 `pnpm`（项目以 `pnpm-lock.yaml` 作为锁定文件）
+- 运行命令时使用 `pnpm` 而非 `npm`，例如 `pnpm install`、`pnpm run build`、`pnpm run lint`

@@ -2,8 +2,8 @@
 
 ## 环境准备
 
-- **Node.js**: 24.x（见 `.node-version`，推荐使用 `fnm` 或 `nvm` 管理版本）
-- **包管理器**: npm（项目使用 `package-lock.json`）
+- **Node.js**: 24.x（见 `.node-version`，使用 `fnm` 管理版本）
+- **包管理器**: pnpm（项目使用 `pnpm-lock.yaml`）
 - **Chrome**: 用于调试（需安装 Tampermonkey 5.5+）
 
 ## 安装
@@ -11,9 +11,12 @@
 ```bash
 git clone <repo-url>
 cd yinxing.monkey
-fnm use 24   # 或 nvm use 24
-npm install
+fnm use 24
+pnpm install
 ```
+
+> **注意**：本项目使用 pnpm。如果尚未安装，请先 `npm install -g pnpm`。
+pnpm 会自动读取 `.npmrc` 中的配置。
 
 ## 环境配置
 
@@ -30,7 +33,7 @@ cp .env.example .env
 ### 开发构建 + 热更新
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 启动 webpack-dev-server，监听 `http://localhost:8080`（可在 `.env` 中修改 `DEV_SERVER_URL`）。
@@ -38,7 +41,7 @@ npm run dev
 ### 生产构建
 
 ```bash
-npm run build
+pnpm run build
 ```
 
 产物输出到 `lib/index.js`（约 160 KiB，minified）。
@@ -46,13 +49,13 @@ npm run build
 ### 监听模式
 
 ```bash
-npm run watch
+pnpm run watch
 ```
 
 ### 代码检查
 
 ```bash
-npm run lint
+pnpm run lint
 ```
 
 ## 调试流程
@@ -76,7 +79,7 @@ npm run lint
 每次修改源码后，运行：
 
 ```bash
-npm run flush
+pnpm run flush
 ```
 
 这会：
@@ -97,7 +100,7 @@ typeof GM !== 'undefined'  // true 表示 Tampermonkey 已注入
 使用 semantic-release 自动发布：
 
 1. 提交使用 Conventional Commits 格式
-2. CI 触发 `npm run semantic-release`
+2. CI 触发 `pnpm run semantic-release`
 3. 自动推断版本号 → 发布到 npm → jsDelivr CDN
 4. `scripts/release.js` 生成用户脚本头部（`index.js`）
 

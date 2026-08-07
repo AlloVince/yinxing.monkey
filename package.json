@@ -11,17 +11,17 @@
   },
   "devDependencies": {
     "@semantic-release/exec": "^7.0.3",
+    "@semantic-release/git": "^11.0.1",
     "@types/greasemonkey": "^4.0.2",
     "@types/jquery": "^3.5.32",
     "@types/node": "^24.0.0",
     "css-loader": "^7.1.2",
-    "eslint": "^9.0.0",
-    "pre-commit": "^1.2.2",
+    "eslint": "^10.8.0",
     "semantic-release": "^24.2.3",
     "style-loader": "^4.0.0",
     "ts-loader": "^9.5.2",
     "typescript": "^5.8.3",
-    "typescript-eslint": "^8.0.0",
+    "typescript-eslint": "^8.66.0",
     "webpack": "^5.98.0",
     "webpack-cli": "^6.0.1",
     "webpack-dev-server": "^5.2.1"
@@ -36,9 +36,6 @@
     "chrome": "open -na \"Google Chrome\" --args --remote-debugging-port=9222 --user-data-dir=\"$HOME/chrome-dev-profile\"",
     "semantic-release": "semantic-release"
   },
-  "pre-commit": [
-    "lint"
-  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/AlloVince/yinxing.monkey.git"
@@ -49,12 +46,22 @@
     "url": "https://github.com/AlloVince/yinxing.monkey/issues"
   },
   "release": {
-    "prepare": [
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
       "@semantic-release/npm",
       {
         "path": "@semantic-release/exec",
         "cmd": "node scripts/release.js ${nextRelease.version}"
-      }
+      },
+      [
+        "@semantic-release/git",
+        {
+          "assets": ["index.js", "lib/index.js", "package.json"],
+          "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+        }
+      ],
+      "@semantic-release/github"
     ]
   },
   "homepage": "https://github.com/AlloVince/yinxing.monkey#readme"
