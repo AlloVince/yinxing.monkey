@@ -380,7 +380,7 @@ export default class UI {
         border-color: #2777F8;
       }
       #yinxingDropdownContent .save-btn {
-        background: #2777F8;
+        background: #2777F8 !important;
         color: white;
         border: none;
         border-radius: 4px;
@@ -390,7 +390,7 @@ export default class UI {
         white-space: nowrap;
       }
       #yinxingDropdownContent .save-btn:hover {
-        background: #1a5fc7;
+        background: #1a5fc7 !important;
       }
       #yinxingDropdownContent .divider {
         border-bottom: 1px solid #f3f4f6;
@@ -467,7 +467,7 @@ export default class UI {
   /** 初始化所有 UI 修改（布局、标题、缩略图、菜单等），仅在 115.com 生效 */
   static initUI(): void {
     // DEBUG: 版本标记，每次修改代码时更新此值
-    const DEBUG_VERSION = 'v4';
+    const DEBUG_VERSION = 'v5';
     console.debug('[Yinxing:Debug]', DEBUG_VERSION);
     const debugDiv = document.getElementById('yinxingDebug') || (() => {
       const d = document.createElement('div');
