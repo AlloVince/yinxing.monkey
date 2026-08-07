@@ -269,7 +269,7 @@ export class YYWCloud {
     const { sign } = await this.getSign();
     return (await YYWCloud.requestAPI({
       method: 'POST',
-      url: 'http://115.com/web/lixian/?ct=lixian&ac=add_task_url',
+      url: 'https://115.com/web/lixian/?ct=lixian&ac=add_task_url',
       body: { sign, url: magnet, uid: this.uid, time: Date.now() },
     })) as {
       info_hash: string;
