@@ -52,7 +52,7 @@
       "@semantic-release/npm",
       {
         "path": "@semantic-release/exec",
-        "cmd": "node scripts/release.js $VERSION"
+        "cmd": "node scripts/release.js"
       },
       [
         "@semantic-release/git",

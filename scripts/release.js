@@ -1,6 +1,9 @@
 const fs = require('fs');
 const path = require('path');
-const [, , version] = process.argv;
+
+// 从 package.json 读取版本号（@semantic-release/npm 已在 exec 之前更新它）
+const pkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, '..', 'package.json'), 'utf8'));
+const version = pkg.version;
 
 /** Load .env file manually (avoid extra dependency). */
 function loadEnv() {
