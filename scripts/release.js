@@ -53,5 +53,8 @@ fs.writeFileSync(
 // @grant        unsafeWindow
 // @run-at       document-start
 // @include      http*
-// ==/UserScript==`,
+// ==/UserScript==
+
+// GreasyFork 要求脚本包含可执行代码
+void 0;`,
 );
