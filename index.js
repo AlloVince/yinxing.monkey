@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         银杏
 // @namespace    yinxing
-// @version      undefined
+// @version      1.1.6
 // @description  Quick copy & send magnet links
 // @author       AlloVince
-// @require      https://cdn.jsdelivr.net/npm/yinxing.monkey@undefined/lib/index.js
+// @require      https://cdn.jsdelivr.net/npm/yinxing.monkey@1.1.6/lib/index.js
 // @grant        GM.xmlHttpRequest
 // @grant        GM.addStyle
 // @grant        GM.notification
