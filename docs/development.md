@@ -97,7 +97,7 @@ typeof GM !== 'undefined'  // true 表示 Tampermonkey 已注入
 
 ## 发布流程
 
-使用 semantic-release 自动发布：
+发布流程详见 [`docs/ci-cd.md`](./ci-cd.md)。
 
 1. 提交使用 Conventional Commits 格式
 2. CI 触发 `pnpm run semantic-release`

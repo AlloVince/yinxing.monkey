@@ -68,6 +68,7 @@
 | 文档 | 用途 |
 |---|---|
 | `docs/architecture.md` | 系统架构、模块职责、数据流 |
+| `docs/ci-cd.md` | CI/CD 与发布流程（npm + jsDelivr + GreasyFork） |
 | `docs/development.md` | 环境准备、安装、启动、开发流程 |
 | `docs/troubleshooting.md` | 调试方法、已知问题、常见错误 |
 | `docs/decisions/` | 架构决策记录 (ADR) |
