@@ -104,6 +104,7 @@ export default class MonkeyKernel {
         method,
         url,
         data,
+        headers: request.headers,
         onerror: (err: unknown) => {
           console.debug('[GM:Kernel]Request: %o, Response error: %o', request, err);
           reject(err);

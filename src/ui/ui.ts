@@ -467,7 +467,7 @@ export default class UI {
   /** 初始化所有 UI 修改（布局、标题、缩略图、菜单等），仅在 115.com 生效 */
   static initUI(): void {
     // DEBUG: 版本标记，每次修改代码时更新此值
-    const DEBUG_VERSION = 'v6';
+    const DEBUG_VERSION = 'v7';
     console.debug('[Yinxing:Debug]', DEBUG_VERSION);
     const debugDiv = document.getElementById('yinxingDebug') || (() => {
       const d = document.createElement('div');
